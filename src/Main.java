@@ -23,7 +23,11 @@ public class Main {
         System.out.println("Solving...");
 
         AFB solver = new AFB(10, 0.25, 0.01, 0.67, 0.07, 0.75, 5000, tsp);
+
+        long start = System.currentTimeMillis();
         Object[] res = solver.solve();
+        float sec = (System.currentTimeMillis() - start) / 1000F;
+
         int[] tour = (int[]) res[0];
         for (int i=0; i<tour.length; i++) {
             System.out.print(tour[i]);
@@ -36,6 +40,7 @@ public class Main {
         }
         System.out.println();
         System.out.println("Distance: " + (double) res[1]);
+        System.out.println("Time: " + sec + " seconds");
     }
 
     public static int[][] createRandomTSP(Integer size) {
