@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        int[][] tsp = readTSP("./data/tsp.txt"); // createRandomTSP(10);
+        int[][] tsp = readTSP("./data/tsp_3.txt"); // createRandomTSP(10);
         System.out.println("TSP Matrix:");
         System.out.println("--------------------------------------------------");
         for (int[] ints : tsp) {
@@ -22,13 +22,16 @@ public class Main {
 
         System.out.println("Solving...");
 
-        AFB solver = new AFB(4, 0.25, 0.01, 0.67, 0.07, 0.75, 1000, tsp);
+        AFB solver = new AFB(10, 0.25, 0.01, 0.67, 0.07, 0.75, 5000, tsp);
         Object[] res = solver.solve();
         int[] tour = (int[]) res[0];
-        for (int i: tour) {
-            System.out.print(i);
+        for (int i=0; i<tour.length; i++) {
+            System.out.print(tour[i]);
             if (i != tour.length-1) {
                 System.out.print(" -> ");
+            }
+            if ((i%20)==0 && i!=0) {
+                System.out.println();
             }
         }
         System.out.println();

@@ -51,7 +51,6 @@ public class AFB {
         init();
 
         while (this.curr_iters < this.max_iters) {
-            if ((this.curr_iters % 100) == 0) System.out.println("[DEBUG]: Iteration: " + this.curr_iters);
             for (int i = 0; i < this.n_birds; i++) { // multiprocessing?
                 double p;
                 if ((this.m[i] > 1) || (this.f[i] == this.F[i])) {
@@ -115,6 +114,8 @@ public class AFB {
     }
 
     private void cost(int i) { // after each iteration for each bird simultaneously?
+        if ((this.curr_iters % 100) == 0) System.out.println("[DEBUG]: Iteration: " + this.curr_iters);
+
         double cost = 0;
         for (int j = 1; j < this.n_cities; j++) {
             cost += this.tsp[this.x[i][j-1]][this.x[i][j]];
