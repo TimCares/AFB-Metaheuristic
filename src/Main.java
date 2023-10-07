@@ -1,3 +1,5 @@
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Random;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -24,9 +26,17 @@ public class Main {
 
         AFB solver = new AFB(10, 0.25, 0.01, 0.67, 0.07, 0.75, 5000, tsp);
 
-        long start = System.currentTimeMillis();
-        Object[] res = solver.solve();
-        float sec = (System.currentTimeMillis() - start) / 1000F;
+        int repeat = 10;
+        double times = 0;
+        double distance = 0;
+        Object[] res = null;
+        for (int i=0; i<repeat; i++) {
+            long start = System.currentTimeMillis();
+            res = solver.solve();
+            times += (System.currentTimeMillis() - start) / 1000F;
+            distance += (double) res[1];
+        }
+
 
         int[] tour = (int[]) res[0];
         for (int i=0; i<tour.length; i++) {
@@ -38,9 +48,11 @@ public class Main {
                 System.out.println();
             }
         }
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setRoundingMode(RoundingMode.CEILING);
         System.out.println();
-        System.out.println("Distance: " + (double) res[1]);
-        System.out.println("Time: " + sec + " seconds");
+        System.out.println("Distance: " + distance/repeat);
+        System.out.println("Time: " + df.format(times/repeat) + " seconds");
     }
 
     public static int[][] createRandomTSP(Integer size) {
