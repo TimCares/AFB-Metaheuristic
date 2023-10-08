@@ -18,7 +18,7 @@ public class Main {
 
         System.out.println("Solving...");
 
-        AFB solver = new AFB(20, 0.25, 0.01, 0.67, 0.07, 0.75, 10000, tsp);
+        AFB solver = new AFB(20, 0.01, 0.67, 0.07, 0.75, 10000, tsp);
 
         int repeat = 1;
         double times = 0;
