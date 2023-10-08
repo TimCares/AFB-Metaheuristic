@@ -1,32 +1,26 @@
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.Random;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        int[][] tsp = readTSP("./data/tsp_3.txt"); // createRandomTSP(10);
-        System.out.println("TSP Matrix:");
-        System.out.println("--------------------------------------------------");
-        for (int[] ints : tsp) {
-            for (int j = 0; j < tsp.length; j++) {
-                System.out.printf("%4d", ints[j]);
+        String xmlFilePath = "./data/a280.xml";
+        //double[][] tsp = TSPLoader.readTSP("./data/tsp_3.txt");
+        //double[][] tsp = createRandomTSP(10);
+        double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
+
+        for (double[] row : tsp) {
+            for (double cost : row) {
+                System.out.printf("%10f ", cost);
             }
             System.out.println();
         }
-        System.out.println("--------------------------------------------------");
         System.out.println();
 
         System.out.println("Solving...");
 
-        AFB solver = new AFB(10, 0.25, 0.01, 0.67, 0.07, 0.75, 5000, tsp);
+        AFB solver = new AFB(20, 0.25, 0.01, 0.67, 0.07, 0.75, 10000, tsp);
 
-        int repeat = 10;
+        int repeat = 1;
         double times = 0;
         double distance = 0;
         Object[] res = null;
@@ -53,59 +47,6 @@ public class Main {
         System.out.println();
         System.out.println("Distance: " + distance/repeat);
         System.out.println("Time: " + df.format(times/repeat) + " seconds");
-    }
-
-    public static int[][] createRandomTSP(Integer size) {
-        Random rand = new Random();
-        rand.setSeed(42);
-        if (size==null) {
-            size = rand.nextInt(30);
-        }
-        int[][] tsp = new int[size][size];
-
-        for (int i=0; i<tsp.length; i++) {
-            for (int j=0; j<=i; j++) {
-                if (i==j) {
-                    tsp[i][j] = 0;
-                } else {
-                    tsp[i][j] = rand.nextInt(100);
-                }
-                tsp[j][i] = tsp[i][j];
-            }
-        }
-        return tsp;
-    }
-
-    public static int[][] readTSP(String filePath) {
-        try {
-            List<String> lines = new ArrayList<>();
-
-            // Read the file into a list of lines
-            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    lines.add(line);
-                }
-            }
-
-            // Convert the lines into a 2D array
-            int[][] twoDArray = lines.stream()
-                    .map(line -> line.trim().replaceAll("\\s{2,}", " ").split("\\s+"))
-                    .map(arr -> {
-                        int[] row = new int[arr.length];
-                        for (int i = 0; i < arr.length; i++) {
-                            row[i] = Integer.parseInt(arr[i]);
-                        }
-                        return row;
-                    })
-                    .collect(Collectors.toList())
-                    .toArray(new int[lines.size()][]);
-
-            return twoDArray;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }

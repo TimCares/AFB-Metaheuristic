@@ -4,7 +4,7 @@ public class AFB {
     private int n_birds;
     private int n_cities;
     private double r;
-    private int[][] tsp;
+    private double[][] tsp;
     private int[][] X;
     private int[][] x;
     private double[] F;
@@ -19,7 +19,7 @@ public class AFB {
     //boolean[][] visited = new boolean[][] {}; later (from Tabu search)?
 
     public AFB(int n_birds, double p1, double p2, double p3, double p4,
-               double r, int max_iters, int[][] tsp) {
+               double r, int max_iters, double[][] tsp) {
 
         // configuration
         this.n_birds = n_birds;
