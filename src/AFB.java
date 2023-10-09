@@ -1,21 +1,20 @@
 import java.util.Random;
+import java.util.ArrayList;
 
-public class AFB {
-    private int n_birds;
-    private int n_cities;
-    private double smallBirdRatio;
-    private double[][] tsp;
-    private int[][] bestPositions;
-    private int[][] currPositions;
-    private double[] bestPositionValues;
-    private double[] currPositionValues;
-    private boolean[] isBigBird;
-    private int[] lastMoves;
-    private int max_iters;
-    private int curr_iters;
-    private double[] probas;
-    private double rangeDiff;
-    private Random rand;
+abstract public class AFB<T> {
+    protected int n_birds;
+    protected double smallBirdRatio;
+    protected ArrayList<T> bestPositions;
+    protected ArrayList<T> currPositions;
+    protected double[] bestPositionValues;
+    protected double[] currPositionValues;
+    protected boolean[] isBigBird;
+    protected int[] lastMoves;
+    protected int max_iters;
+    protected int curr_iters;
+    protected double[] probas;
+    protected double rangeDiff;
+    protected Random rand;
     //boolean[][] visited = new boolean[][] {}; later (from Tabu search)?
 
     public AFB(
@@ -24,19 +23,13 @@ public class AFB {
         double probMoveBest,
         double probMoveJoin,
         double smallBirdRatio,
-        int max_iters,
-        double[][] tsp
+        int max_iters
     ) {
         // configuration
         this.n_birds = n_birds;
-        this.n_cities = tsp.length;
         this.smallBirdRatio = smallBirdRatio;
-        this.tsp = tsp;
-
 
         // per bird data
-        this.bestPositions = new int[n_birds][n_cities];
-        this.currPositions = new int[n_birds][n_cities];
         this.bestPositionValues = new double[n_birds];
         this.currPositionValues = new double[n_birds];
         this.isBigBird = new boolean[n_birds];
@@ -47,17 +40,22 @@ public class AFB {
 
         double probMoveWalk = 1.0 - probMoveRandom - probMoveBest - probMoveJoin;
         if (probMoveWalk < 0.0) {
-          throw new Error("Probabilities can't add up to more than 100%");
+            throw new Error("Probabilities can't add up to more than 100%");
         }
         // efficient implementation
-        this.probas = new double[] {probMoveWalk, probMoveRandom, probMoveBest, probMoveJoin};
+        this.probas = new double[] {
+            probMoveWalk,
+            probMoveRandom,
+            probMoveBest,
+            probMoveJoin
+        };
         this.rangeDiff = 1-probMoveJoin;
         this.rand = new Random();
         this.rand.setSeed(42);
 
     }
 
-    public Object[] solve() {
+    public AFBResult<T> solve() {
         init();
 
         while (this.curr_iters < this.max_iters) {
@@ -80,16 +78,16 @@ public class AFB {
                     cost(i);
                 } else if (p >= this.probas[3]) {
                     this.lastMoves[i] = 3;
-                    this.currPositions[i] = this.bestPositions[i]; // correct?
+                    this.currPositions.set(i, this.bestPositions.get(i)); // correct?
                     this.currPositionValues[i] = this.bestPositionValues[i];
                 } else {
                     this.lastMoves[i] = 4;
                     int j = exclusiveRandInt(i);
-                    this.currPositions[i] = this.currPositions[j];
+                    this.currPositions.set(i, this.currPositions.get(j));
                     this.currPositionValues[i] = this.currPositionValues[j];
                 }
                 if (this.currPositionValues[i] <= this.bestPositionValues[i]) {
-                    this.bestPositions[i] = this.currPositions[i];
+                    this.bestPositions.set(i, this.currPositions.get(i));
                     this.bestPositionValues[i] = this.currPositionValues[i];
                 }
             }
@@ -105,88 +103,15 @@ public class AFB {
                 idxBest = i;
             }
         }
-        return new Object[] {this.bestPositions[idxBest], bestCost};
+        return new AFBResult<T>(this.bestPositions.get(idxBest), bestCost);
     }
 
-    private void init() {
-        for (int i=0; i<this.n_birds; i++) {
-            for (int j=0; j<this.n_cities; j++) {
-                this.currPositions[i][j] = j;
-                this.bestPositions[i][j] = j;
-            }
-            fly(i);
-            cost(i);
-            this.bestPositionValues[i] = this.currPositionValues[i];
-            this.lastMoves[i] = 2;
-            this.isBigBird[i] = (i <= Math.ceil(this.smallBirdRatio*this.n_birds));
-        }
-        this.curr_iters = 0; // just now, because we call 'cost' above
-    }
+    abstract void init();
+    abstract void cost(int i);
+    abstract void fly(int i);
+    abstract void walk(int i);
 
-    private void cost(int i) { // after each iteration for each bird simultaneously?
-        if ((this.curr_iters % 100) == 0) System.out.println("[DEBUG]: Iteration: " + this.curr_iters);
-
-        double cost = 0;
-        for (int j = 1; j < this.n_cities; j++) {
-            cost += this.tsp[this.currPositions[i][j-1]][this.currPositions[i][j]];
-        }
-        this.currPositionValues[i] = cost;
-        this.curr_iters++;
-    }
-
-    private void fly(int i) { // essentially just shuffles the order
-        for (int j = this.n_cities - 1; j > 0; j--) {
-            int idx = this.rand.nextInt(j + 1);
-
-            int tmp = this.currPositions[i][idx];
-            this.currPositions[i][idx] = this.currPositions[i][j];
-            this.currPositions[i][j] = tmp;
-        }
-    }
-
-    private void walk(int i) {
-        int delta = 0;
-        int k = -1;
-        for (int u=0; u<100; u++) {
-            int j = exclusiveRandInt(i);
-            k = this.rand.nextInt(this.n_cities-1)+1;
-            int delta_new = position_of(this.currPositions[i][k], j) - position_of(this.currPositions[i][k-1], j);
-            int delta_new_abs = Math.abs(delta_new);
-            if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
-                delta = delta_new_abs;//delta_new;
-                break;
-            }
-        }
-        if (this.n_birds <= 3) {
-            delta = 2;
-        } else if (delta==0) {
-            delta = this.rand.nextInt(this.n_birds-2)+1; // between 2 and n-1
-        }
-        if (k==-1) System.err.println("Fehler mit K");
-        int l = (k + delta) % this.n_cities;
-        if (k > l) {
-            int tmp = k;
-            k = l;
-            l = tmp;
-        }
-        for (int u = k, v = l-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
-            int temp = this.currPositions[i][u];
-            this.currPositions[i][u] = this.currPositions[i][v];
-            this.currPositions[i][v] = temp;
-        }
-    }
-
-    private int position_of(int value, int j) {
-        for (int pos=0; pos<this.n_cities; pos++) {
-            if (this.currPositions[j][pos] == value) {
-                return pos;
-            }
-        }
-        System.err.println("Fehler: Stadt mit Index '" + value + "' nicht in Tour  '" + value + "' gefunden!");
-        return 0; // Wird nie der Fall sein, da value, also der index der Stadt immer in der Tour j vorkommt
-    }
-
-    private int exclusiveRandInt(int exclude) {
+    protected int exclusiveRandInt(int exclude) {
         int j = exclude;
         while (j == exclude) {
             j = this.rand.nextInt(this.n_birds);
