@@ -55,6 +55,7 @@ abstract public class AFB<T> {
 
     }
 
+
     public AFBResult<T> solve() {
         init();
 
@@ -83,7 +84,7 @@ abstract public class AFB<T> {
                 } else {
                     this.lastMoves[i] = 4;
                     int j = exclusiveRandInt(i);
-                    this.currPositions.set(i, this.currPositions.get(j));
+                    this.currPositions.set(i, this.clone(this.currPositions.get(j)));
                     this.currPositionValues[i] = this.currPositionValues[j];
                 }
                 if (this.currPositionValues[i] <= this.bestPositionValues[i]) {
@@ -110,6 +111,8 @@ abstract public class AFB<T> {
     abstract void cost(int i);
     abstract void fly(int i);
     abstract void walk(int i);
+
+    abstract T clone(T old);
 
     protected int exclusiveRandInt(int exclude) {
         int j = exclude;
