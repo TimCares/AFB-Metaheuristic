@@ -1,9 +1,11 @@
 import java.util.Arrays;
+import java.util.Random;
 
 public class Test {
     public static void testWalkSwap() {
         double[][] tsp = TSPLoader.createRandomTSP(2);
-        AFB_TSP solver = new AFB_TSP_Swap(4, 0.01, 0.67, 0.07, 1.00, 1000, tsp);
+        Random rand = new Random(42);
+        AFB_TSP solver = new AFB_TSP_Swap(4, 0.01, 0.67, 0.07, 1.00, 1000, tsp, rand);
         solver.init();
         int[] oldPosition = solver.birds.get(0).position.clone();
         solver.walk(0);
@@ -19,6 +21,8 @@ public class Test {
         assert tsp != null;
         //double[][] tsp = TSPLoader.readTSP("../data/tsp_3.txt");
 
+        Random rand = new Random(42);
+
         int birdCount = 2000;
         int lowIters = 100;
         AFB<int[]> solverLowIter = new AFB_TSP_Swap(
@@ -28,13 +32,23 @@ public class Test {
             0.01,
             0.60,
             lowIters,
-            tsp
+            tsp,
+            rand
         );
         solverLowIter.init();
         AFBResult<int[]> resLowIter = solverLowIter.solve();
 
-        int highIters = 200000;
-        AFB<int[]> solverHighIter = new AFB_TSP_Swap(birdCount, 0.5, 0.01, 0.01, 0.60, highIters, tsp);
+        int highIters = 2000;
+        AFB<int[]> solverHighIter = new AFB_TSP_Swap(
+            birdCount,
+            0.1,
+            0.01,
+            0.01,
+            0.60,
+            highIters,
+            tsp,
+            rand
+        );
         solverHighIter.init();
         AFBResult<int[]> resHighIter = solverHighIter.solve();
 

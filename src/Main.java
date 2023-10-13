@@ -1,12 +1,13 @@
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
         // Pa561 optimal route => 2763
         //String xmlFilePath = "../data/pa561/pa561.xml";
         //String xmlFilePath = "../data/pa561/pa561.xml";
-        String xmlFilePath = "../data/eil101/eil101.xml";
+        String xmlFilePath = "./data/eil101/eil101.xml";
         //String xmlFilePath = "../data/rl5934/rl5934.xml";
         //double[][] tsp = TSPLoader.readTSP("../data/tsp_3.txt");
         //double[][] tsp = createRandomTSP(10);
@@ -24,7 +25,17 @@ public class Main {
 
         System.out.println("Solving...");
 
-        AFB<int[]> solver = new AFB_TSP(200, 0.01, 0.67, 0.07, 1.00, 1000, tsp);
+        Random rand = new Random();
+        AFB<int[]> solver = new AFB_TSP(
+            200,
+            0.01,
+            0.67,
+            0.07,
+            1.00,
+            1000,
+            tsp,
+            rand
+        );
 
         int repeat = 1;
         double times = 0;

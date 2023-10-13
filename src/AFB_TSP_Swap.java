@@ -1,3 +1,5 @@
+import java.util.Random;
+
 // AFB for TSP with swap local search.
 public class AFB_TSP_Swap extends AFB_TSP {
     public AFB_TSP_Swap(
@@ -7,9 +9,10 @@ public class AFB_TSP_Swap extends AFB_TSP {
         double probMoveJoin,
         double smallBirdRatio,
         int max_iters,
-        double[][] tsp
+        double[][] tsp,
+        Random rand
     ) {
-      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp);
+      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
     }
 
     // Performs a random swap of two cities for local search.

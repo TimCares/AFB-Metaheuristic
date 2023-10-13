@@ -1,4 +1,5 @@
 import java.util.Collections;
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -13,9 +14,10 @@ public class AFB_TSP extends AFB<int[]> {
         double probMoveJoin,
         double smallBirdRatio,
         int max_iters,
-        double[][] tsp
+        double[][] tsp,
+        Random rand
     ) {
-      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters);
+      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
 
       this.n_cities = tsp.length;
       Logger.log("Processing TSP with length " + this.n_cities);

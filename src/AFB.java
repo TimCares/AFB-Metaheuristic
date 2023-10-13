@@ -27,7 +27,8 @@ abstract public class AFB<T> {
         double probMoveBest,
         double probMoveJoin,
         double smallBirdRatio,
-        int max_iters
+        int max_iters,
+        Random rand
     ) {
         // configuration
         this.n_birds = n_birds;
@@ -44,8 +45,7 @@ abstract public class AFB<T> {
         if (this.probMoveWalk < 0.0) {
             throw new Error("Probabilities can't add up to more than 100%");
         }
-        this.rand = new Random();
-        this.rand.setSeed(42);
+        this.rand = rand;
     }
 
     private BirdMove determineNextMove(Bird<T> bird) {
