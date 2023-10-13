@@ -1,9 +1,10 @@
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class AFB_TSP extends AFB<int[]> {
-    private int n_cities;
-    private double[][] tsp;
+    protected int n_cities;
+    protected double[][] tsp;
   
     public AFB_TSP(
         int n_birds,
@@ -17,64 +18,76 @@ public class AFB_TSP extends AFB<int[]> {
       super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters);
 
       this.n_cities = tsp.length;
+      Logger.log("Processing TSP with length " + this.n_cities);
       this.tsp = tsp;
     }
 
     @Override
-    void init() {
-        this.bestPositions = new ArrayList<int[]>(
-            Collections.nCopies(n_birds, new int[n_cities])
-        );
-        this.currPositions = new ArrayList<int[]>(
-            Collections.nCopies(n_birds, new int[n_cities])
-        );
-
-        System.out.format("%d\n", this.currPositions.size());
-        for (int i=0; i<this.n_birds; i++) {
-            for (int j=0; j<this.n_cities; j++) {
-                this.currPositions.get(i)[j] = j;
-                this.bestPositions.get(i)[j] = j;
-            }
-            fly(i);
-            cost(i);
-            this.bestPositionValues[i] = this.currPositionValues[i];
-            this.lastMoves[i] = 2;
-            this.isBigBird[i] = (i <= Math.ceil(this.smallBirdRatio*this.n_birds));
-        }
-        this.curr_iters = 0; // just now, because we call 'cost' above
+    int[] clone(int[] old) {
+      return old.clone();
     }
 
     @Override
-    void cost(int i) { // after each iteration for each bird simultaneously?
-        if ((this.curr_iters % 100) == 0) System.out.println("[DEBUG]: Iteration: " + this.curr_iters);
+    void init() {
+        this.birds = new ArrayList<Bird<int[]>>(this.n_birds);
 
+        for (int birdIndex=0; birdIndex<this.n_birds; birdIndex++) {
+            Bird<int[]> newBird = new Bird<int[]>(
+                new int[this.n_cities],
+                0.0,
+                new int[this.n_cities],
+                0.0,
+                false,
+                BirdMove.FlyRandom
+            );
+            for (int cityIndex=0; cityIndex<this.n_cities; cityIndex++) {
+                newBird.position[cityIndex] = cityIndex;
+                newBird.bestPosition[cityIndex] = cityIndex;
+            }
+            this.birds.add(newBird);
+            fly(birdIndex);
+            newBird.lastMove = BirdMove.FlyRandom;
+            cost(birdIndex);
+            newBird.bestPosition = clone(newBird.position);
+            newBird.bestCost = newBird.cost;
+            newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
+        }
+        this.curr_iters = 0; // just now, because we call 'cost' above
+        Logger.log("[DEBUG]: Initialization done.");
+    }
+
+    @Override
+    void cost(int birdIndex) { // after each iteration for each bird simultaneously?
+        if ((this.curr_iters % 100) == 0) Logger.log("[DEBUG]: Iteration: " + this.curr_iters);
+
+        Bird<int[]> bird = this.birds.get(birdIndex);
+        int[] route = bird.position;
         double cost = 0;
         for (int j = 1; j < this.n_cities; j++) {
-            cost += this.tsp[this.currPositions.get(i)[j-1]][this.currPositions.get(i)[j]];
+            cost += this.tsp[route[j-1]][route[j]];
         }
-        this.currPositionValues[i] = cost;
+        bird.cost = cost;
         this.curr_iters++;
     }
 
     @Override
-    void fly(int i) { // essentially just shuffles the order
-        for (int j = this.n_cities - 1; j > 0; j--) {
-            int idx = this.rand.nextInt(j + 1);
-
-            int tmp = this.currPositions.get(i)[idx];
-            this.currPositions.get(i)[idx] = this.currPositions.get(i)[j];
-            this.currPositions.get(i)[j] = tmp;
-        }
+    void fly(int birdIndex) {
+        Bird<int[]> bird = this.birds.get(birdIndex);
+        ArrayList<Integer> boxedRoute = new ArrayList<>(Arrays.stream(bird.position).boxed().toList());
+        Collections.shuffle(boxedRoute);
+        bird.position = boxedRoute.stream().mapToInt(i -> i).toArray();
     }
 
     @Override
     void walk(int i) {
+        // 2-opt local search
+        Bird<int[]> bird = this.birds.get(i);
         int delta = 0;
         int k = -1;
         for (int u=0; u<100; u++) {
             int j = exclusiveRandInt(i);
             k = this.rand.nextInt(this.n_cities-1)+1;
-            int delta_new = position_of(this.currPositions.get(i)[k], j) - position_of(this.currPositions.get(i)[k-1], j);
+            int delta_new = position_of(bird.position[k], bird) - position_of(bird.position[k-1], bird);
             int delta_new_abs = Math.abs(delta_new);
             if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
                 delta = delta_new_abs;//delta_new;
@@ -94,19 +107,20 @@ public class AFB_TSP extends AFB<int[]> {
             l = tmp;
         }
         for (int u = k, v = l-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
-            int temp = this.currPositions.get(i)[u];
-            this.currPositions.get(i)[u] = this.currPositions.get(i)[v];
-            this.currPositions.get(i)[v] = temp;
+            int temp = bird.position[u];
+            bird.position[u] = bird.position[v];
+            bird.position[v] = temp;
         }
     }
 
-    private int position_of(int value, int j) {
-        for (int pos=0; pos<this.n_cities; pos++) {
-            if (this.currPositions.get(j)[pos] == value) {
-                return pos;
+    // Performs a linear search for the position of the city with index 'cityIndex' in the route of bird 'bird'.
+    private int position_of(int cityIndex, Bird<int[]> bird) {
+        for (int routeIndex=0; routeIndex<this.n_cities; routeIndex++) {
+            if (bird.position[routeIndex] == cityIndex) {
+                return routeIndex;
             }
         }
-        System.err.println("Fehler: Stadt mit Index '" + value + "' nicht in Tour  '" + value + "' gefunden!");
+        System.err.println("Fehler: Stadt mit Index '" + cityIndex + "' nicht in Tour  '" + cityIndex + "' gefunden!");
         return 0; // Wird nie der Fall sein, da value, also der index der Stadt immer in der Tour j vorkommt
     }
 

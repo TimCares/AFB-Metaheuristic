@@ -1,20 +1,24 @@
 import java.util.Random;
 import java.util.ArrayList;
 
+// A generic implementation of the Artificial Feeding Birds metaheuristic.
+// The type `T` is the type of the position of a bird in the search space.
 abstract public class AFB<T> {
+
     protected int n_birds;
     protected double smallBirdRatio;
-    protected ArrayList<T> bestPositions;
-    protected ArrayList<T> currPositions;
-    protected double[] bestPositionValues;
-    protected double[] currPositionValues;
-    protected boolean[] isBigBird;
-    protected int[] lastMoves;
+    protected double probMoveWalk;
+    protected double probMoveRandom;
+    protected double probMoveBest;
+    protected double probMoveJoin;
+    protected ArrayList<Bird<T>> birds;
+
     protected int max_iters;
     protected int curr_iters;
-    protected double[] probas;
-    protected double rangeDiff;
     protected Random rand;
+
+    protected double rangeDiff;
+
     //boolean[][] visited = new boolean[][] {}; later (from Tabu search)?
 
     public AFB(
@@ -28,83 +32,99 @@ abstract public class AFB<T> {
         // configuration
         this.n_birds = n_birds;
         this.smallBirdRatio = smallBirdRatio;
-
-        // per bird data
-        this.bestPositionValues = new double[n_birds];
-        this.currPositionValues = new double[n_birds];
-        this.isBigBird = new boolean[n_birds];
-        this.lastMoves = new int[n_birds];
+        this.birds = new ArrayList<Bird<T>>(n_birds);
 
         // stopping criteria
         this.max_iters = max_iters;
 
-        double probMoveWalk = 1.0 - probMoveRandom - probMoveBest - probMoveJoin;
-        if (probMoveWalk < 0.0) {
+        this.probMoveRandom = probMoveRandom;
+        this.probMoveBest = probMoveBest;
+        this.probMoveJoin = probMoveJoin;
+        this.probMoveWalk = 1.0 - probMoveRandom - probMoveBest - probMoveJoin;
+        if (this.probMoveWalk < 0.0) {
             throw new Error("Probabilities can't add up to more than 100%");
         }
-        // efficient implementation
-        this.probas = new double[] {
-            probMoveWalk,
-            probMoveRandom,
-            probMoveBest,
-            probMoveJoin
-        };
-        this.rangeDiff = 1-probMoveJoin;
         this.rand = new Random();
         this.rand.setSeed(42);
-
     }
 
+    private BirdMove determineNextMove(Bird<T> bird) {
+        if (bird.lastMove.isFlying()
+         || bird.position.equals(bird.bestPosition)) {
+            // If the bird just flew or is at the best position yet, always walk.
+            return BirdMove.Walk;
+        }
+        if (bird.isBigBird && rand.nextDouble() < this.probMoveJoin) {
+            // A small bird does not join other birds.
+            return BirdMove.FlyBest;
+        }
+
+        double p = this.rand.nextDouble(this.probMoveWalk + this.probMoveRandom + this.probMoveBest);
+        if (p <= this.probMoveWalk) {
+            return BirdMove.Walk;
+        } else if (p <= this.probMoveWalk + this.probMoveRandom) {
+            return BirdMove.FlyRandom;
+        } else {
+            return BirdMove.FlyBest;
+        }
+    }
 
     public AFBResult<T> solve() {
         init();
 
         while (this.curr_iters < this.max_iters) {
             for (int i = 0; i < this.n_birds; i++) { // multiprocessing?
-                double p;
-                if ((this.lastMoves[i] > 1) || (this.currPositionValues[i] == this.bestPositionValues[i])) {
-                    p = 1;
-                } else if (!this.isBigBird[i]) {
-                    p = this.rand.nextDouble() * rangeDiff + this.probas[3];
-                } else {
-                    p = this.rand.nextDouble();
-                }
-                if (p >= (1 - this.probas[0])) {
-                    this.lastMoves[i] = 1;
-                    walk(i);
-                    cost(i);
-                } else if (p >= (this.probas[2] + this.probas[3])) {
-                    this.lastMoves[i] = 2;
-                    fly(i);
-                    cost(i);
-                } else if (p >= this.probas[3]) {
-                    this.lastMoves[i] = 3;
-                    this.currPositions.set(i, this.bestPositions.get(i)); // correct?
-                    this.currPositionValues[i] = this.bestPositionValues[i];
-                } else {
-                    this.lastMoves[i] = 4;
-                    int j = exclusiveRandInt(i);
-                    this.currPositions.set(i, this.clone(this.currPositions.get(j)));
-                    this.currPositionValues[i] = this.currPositionValues[j];
-                }
-                if (this.currPositionValues[i] <= this.bestPositionValues[i]) {
-                    this.bestPositions.set(i, this.currPositions.get(i));
-                    this.bestPositionValues[i] = this.currPositionValues[i];
-                }
-            }
+                Bird<T> bird = this.birds.get(i);
+                BirdMove nextMove = determineNextMove(bird);
 
-        }
-        int idxBest = 0;
-        double bestCost = this.bestPositionValues[0];
-        double curr_cost;
-        for (int i=1; i < this.n_birds; i++) {
-            curr_cost = this.bestPositionValues[i];
-            if (curr_cost < bestCost) {
-                bestCost = curr_cost;
-                idxBest = i;
+                bird.lastMove = nextMove;
+                switch (nextMove) {
+                    case Walk:
+                        walk(i);
+                        cost(i);
+                        break;
+                    case FlyRandom:
+                        fly(i);
+                        cost(i);
+                        break;
+                    case FlyBest:
+                        bird.position = clone(bird.bestPosition);
+                        bird.cost = bird.bestCost;
+                        break;
+                    case FlyToOtherBird:
+                        // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
+
+                        // Exclude i so the bird doesn't join itself
+                        int otherBirdIndex = exclusiveRandInt(i);
+                        Bird<T> otherBird = this.birds.get(otherBirdIndex);
+                        bird.position = clone(otherBird.position);
+                        bird.cost = otherBird.cost;
+                        break;
+                }
+                
+                if (bird.cost < bird.bestCost) {
+                    bird.bestPosition = clone(bird.position);
+                    bird.bestCost = bird.cost;
+                }
             }
         }
-        return new AFBResult<T>(this.bestPositions.get(idxBest), bestCost);
+        
+        
+        int bestBirdIndex = -1;
+        double bestCost = Double.MAX_VALUE;
+        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
+            Bird<T> bird = this.birds.get(birdIndex);
+            if (bird.bestCost < bestCost) {
+                bestCost = bird.bestCost;
+                bestBirdIndex = birdIndex;
+            }
+        }
+        assert bestBirdIndex != -1;
+
+        return new AFBResult<T>(
+            this.birds.get(bestBirdIndex).bestPosition,
+            bestCost
+        );
     }
 
     abstract void init();

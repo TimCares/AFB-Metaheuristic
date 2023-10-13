@@ -3,23 +3,28 @@ import java.text.DecimalFormat;
 
 public class Main {
     public static void main(String[] args) {
-        String xmlFilePath = "./data/a280.xml";
-        //double[][] tsp = TSPLoader.readTSP("./data/tsp_3.txt");
+        // Pa561 optimal route => 2763
+        //String xmlFilePath = "../data/pa561/pa561.xml";
+        //String xmlFilePath = "../data/pa561/pa561.xml";
+        String xmlFilePath = "../data/eil101/eil101.xml";
+        //String xmlFilePath = "../data/rl5934/rl5934.xml";
+        //double[][] tsp = TSPLoader.readTSP("../data/tsp_3.txt");
         //double[][] tsp = createRandomTSP(10);
         double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
 
+        /*
         for (double[] row : tsp) {
             for (double cost : row) {
                 System.out.printf("%10f ", cost);
             }
             System.out.println();
-        }
+        }*/
 
         System.out.println();
 
         System.out.println("Solving...");
 
-        AFB solver = new AFB_TSP(20, 0.01, 0.67, 0.07, 0.75, 10000, tsp);
+        AFB<int[]> solver = new AFB_TSP(200, 0.01, 0.67, 0.07, 1.00, 1000, tsp);
 
         int repeat = 1;
         double times = 0;
@@ -31,7 +36,6 @@ public class Main {
             times += (System.currentTimeMillis() - start) / 1000F;
             distance += res.bestCost;
         }
-
 
         int[] tour = res.bestPosition;
         for (int i=0; i<tour.length; i++) {
