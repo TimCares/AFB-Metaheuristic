@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MetabirdsMain",
+            "request": "launch",
+            "mainClass": "MetabirdsMain",
+            "projectName": "AFB-Metaheuristic_24d1a608"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

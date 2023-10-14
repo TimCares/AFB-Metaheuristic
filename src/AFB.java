@@ -95,8 +95,7 @@ abstract public class AFB<T> {
                         // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
 
                         // Exclude i so the bird doesn't join itself
-                        int otherBirdIndex = exclusiveRandInt(i);
-                        Bird<T> otherBird = this.birds.get(otherBirdIndex);
+                        Bird<T> otherBird = randomBirdExcept(i);
                         bird.position = clone(otherBird.position);
                         bird.cost = otherBird.cost;
                         break;
@@ -134,12 +133,13 @@ abstract public class AFB<T> {
 
     abstract T clone(T old);
 
-    protected int exclusiveRandInt(int exclude) {
-        int j = exclude;
-        while (j == exclude) {
+    // Generate a random bird except for the bird at index `excludedBirdIndex`.
+    protected Bird<T> randomBirdExcept(int excludedBirdIndex) {
+        int j = excludedBirdIndex;
+        while (j == excludedBirdIndex) {
             j = this.rand.nextInt(this.n_birds);
         }
-        return j;
+        return this.birds.get(j);
     }
 
 }

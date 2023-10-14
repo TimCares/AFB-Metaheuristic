@@ -87,9 +87,9 @@ public class AFB_TSP extends AFB<int[]> {
         int delta = 0;
         int k = -1;
         for (int u=0; u<100; u++) {
-            int j = exclusiveRandInt(i);
+            Bird<int[]> otherBird = randomBirdExcept(i);
             k = this.rand.nextInt(this.n_cities-1)+1;
-            int delta_new = position_of(bird.position[k], bird) - position_of(bird.position[k-1], bird);
+            int delta_new = findPositionOfCityInTour(bird.position[k], otherBird) - findPositionOfCityInTour(bird.position[k-1], otherBird);
             int delta_new_abs = Math.abs(delta_new);
             if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
                 delta = delta_new_abs;//delta_new;
@@ -116,14 +116,15 @@ public class AFB_TSP extends AFB<int[]> {
     }
 
     // Performs a linear search for the position of the city with index 'cityIndex' in the route of bird 'bird'.
-    private int position_of(int cityIndex, Bird<int[]> bird) {
+    private int findPositionOfCityInTour(int cityIndex, Bird<int[]> bird) {
         for (int routeIndex=0; routeIndex<this.n_cities; routeIndex++) {
             if (bird.position[routeIndex] == cityIndex) {
                 return routeIndex;
             }
         }
-        System.err.println("Fehler: Stadt mit Index '" + cityIndex + "' nicht in Tour  '" + cityIndex + "' gefunden!");
-        return 0; // Wird nie der Fall sein, da value, also der index der Stadt immer in der Tour j vorkommt
+        assert false;
+        System.err.println("Error: City with index '" + cityIndex + "' not found in tour.");
+        return 0; // Should never happen since every tour contains every city.
     }
 
 }
