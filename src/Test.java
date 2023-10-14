@@ -66,10 +66,19 @@ public class Test {
         assert resLowIter.bestCost > resHighIter.bestCost;
     }
 
+    // Test the function reversInRange
+    public static void testReverseInRange() {
+        int[] arr = {0, 1, 2, 3, 4, 5};
+        int[] expected = {0, 1, 3, 2, 4, 5};
+        AFB_TSP.reverseInRange(arr, 2, 4);
+        assert Arrays.equals(arr, expected);
+    }
+
     public static void main(String[] args) {
         Logger.printLogs = true;
         
-        //testWalkSwap();
+        testReverseInRange();
+        testWalkSwap();
         testIterationCountChangesDistance();
     }
 }

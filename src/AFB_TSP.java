@@ -88,7 +88,8 @@ public class AFB_TSP extends AFB<int[]> {
         int k = -1;
         for (int u=0; u<100; u++) {
             Bird<int[]> otherBird = randomBirdExcept(i);
-            k = this.rand.nextInt(this.n_cities-1)+1;
+            k = this.rand.nextInt(this.n_cities) + 1;
+            assert k >= 1 && k <= this.n_cities;
             int delta_new = findPositionOfCityInTour(bird.position[k], otherBird) - findPositionOfCityInTour(bird.position[k-1], otherBird);
             int delta_new_abs = Math.abs(delta_new);
             if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
@@ -96,22 +97,31 @@ public class AFB_TSP extends AFB<int[]> {
                 break;
             }
         }
-        if (this.n_birds <= 3) {
+        assert k != -1;
+        /*if (this.n_birds <= 3) { TODO: Why?
             delta = 2;
-        } else if (delta==0) {
-            delta = this.rand.nextInt(this.n_birds-2)+1; // between 2 and n-1
+        } else*/
+        if (delta == 0) {
+            delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1
+            assert delta >= 2 && delta <= this.n_birds-1;
         }
-        if (k==-1) System.err.println("Fehler mit K");
         int l = (k + delta) % this.n_cities;
         if (k > l) {
             int tmp = k;
             k = l;
             l = tmp;
         }
-        for (int u = k, v = l-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
-            int temp = bird.position[u];
-            bird.position[u] = bird.position[v];
-            bird.position[v] = temp;
+        int[] newRoute = bird.position.clone();
+        reverseInRange(newRoute, k, l);
+        bird.position = newRoute;
+    }
+    
+    // Reverses the order of the elements in the range [startInclusive, endExclusive) of the given array.
+    public static void reverseInRange(int[] route, int startInclusive, int endExclusive) {
+        for (int u = startInclusive, v = endExclusive-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
+            int temp = route[u];
+            route[u] = route[v];
+            route[v] = temp;
         }
     }
 
