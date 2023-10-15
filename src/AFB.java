@@ -5,6 +5,8 @@ import java.util.ArrayList;
 // The type `T` is the type of the position of a bird in the search space.
 abstract public class AFB<T> {
 
+    // The number of birds in the swarm.
+    // Does not change the number of iterations, more birds means less iterations per bird.
     protected int n_birds;
     protected double smallBirdRatio;
     protected double probMoveWalk;
@@ -13,6 +15,7 @@ abstract public class AFB<T> {
     protected double probMoveJoin;
     protected ArrayList<Bird<T>> birds;
 
+    // The maximum evalutations of the cost function.
     protected int max_iters;
     protected int curr_iters;
     protected Random rand;

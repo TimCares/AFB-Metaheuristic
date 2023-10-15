@@ -88,8 +88,8 @@ public class AFB_TSP extends AFB<int[]> {
         int k = -1;
         for (int u=0; u<100; u++) {
             Bird<int[]> otherBird = randomBirdExcept(i);
-            k = this.rand.nextInt(this.n_cities) + 1;
-            assert k >= 1 && k <= this.n_cities;
+            k = this.rand.nextInt(this.n_cities - 1) + 1;
+            assert k >= 1 && k < this.n_cities;
             int delta_new = findPositionOfCityInTour(bird.position[k], otherBird) - findPositionOfCityInTour(bird.position[k-1], otherBird);
             int delta_new_abs = Math.abs(delta_new);
             if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {

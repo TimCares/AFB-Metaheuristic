@@ -2,17 +2,20 @@ import java.util.ArrayList;
 import java.util.Random;
 
 class AFBParams {
+    public int n_birds;
     public double smallBirdRatio;
     public double probMoveRandom;
     public double probMoveBest;
     public double probMoveJoin;
     
     public AFBParams(
+        int n_birds,
         double smallBirdRatio,
         double probMoveRandom,
         double probMoveBest,
         double probMoveJoin
     ) {
+        this.n_birds = n_birds;
         this.smallBirdRatio = smallBirdRatio;
         this.probMoveRandom = probMoveRandom;
         this.probMoveBest = probMoveBest;
@@ -20,6 +23,7 @@ class AFBParams {
     }
 
     public AFBParams(AFBParams other) {
+        this.n_birds = other.n_birds;
         this.smallBirdRatio = other.smallBirdRatio;
         this.probMoveRandom = other.probMoveRandom;
         this.probMoveBest = other.probMoveBest;
@@ -27,12 +31,19 @@ class AFBParams {
     }
 
     public boolean isInvalid() {
-        return (this.probMoveRandom + this.probMoveBest + this.probMoveJoin > 1.0);
+        if (this.probMoveRandom + this.probMoveBest + this.probMoveJoin > 1.0) {
+            return true;
+        }
+        if (this.n_birds < 3) {
+            return true;
+        }
+        return false;
     }
 }
 
 public class Metabirds extends AFB<AFBParams> {
-    final double stepSize = 0.05;
+    final double stepSize = 0.01;
+    final double stepSizeBirdCount = 1.00;
     double[][] testTSP;
     
     public Metabirds(
@@ -57,6 +68,7 @@ public class Metabirds extends AFB<AFBParams> {
         for (int birdIndex=0; birdIndex<this.n_birds; birdIndex++) {
             Bird<AFBParams> newBird = new Bird<AFBParams>(
                 new AFBParams(
+                    rand.nextInt(100) + 2,
                     rand.nextDouble(),
                     rand.nextDouble(),
                     rand.nextDouble(),
@@ -64,6 +76,7 @@ public class Metabirds extends AFB<AFBParams> {
                 ),
                 0.0,
                 new AFBParams(
+                    rand.nextInt(100) + 2,
                     rand.nextDouble(),
                     rand.nextDouble(),
                     rand.nextDouble(),
@@ -92,7 +105,9 @@ public class Metabirds extends AFB<AFBParams> {
     @Override
     void walk(int birdIndex) {
         Bird<AFBParams> bird = this.birds.get(birdIndex);
-        AFBParams birdParams = bird.position;
+        AFBParams birdParams = new AFBParams(bird.position);
+        birdParams.n_birds += Math.round(rand.nextGaussian() * this.stepSizeBirdCount);
+        birdParams.n_birds = (int) Math.min(birdParams.n_birds, 3.0);
         birdParams.smallBirdRatio += rand.nextGaussian() * this.stepSize;
         birdParams.smallBirdRatio = Math.min(Math.max(birdParams.smallBirdRatio, 0.0), 1.0);
         birdParams.probMoveRandom += rand.nextGaussian() * this.stepSize;
@@ -101,8 +116,9 @@ public class Metabirds extends AFB<AFBParams> {
         birdParams.probMoveBest = Math.min(Math.max(birdParams.probMoveBest, 0.0), 1.0);
         birdParams.probMoveJoin += rand.nextGaussian() * this.stepSize;
         birdParams.probMoveJoin = Math.min(Math.max(birdParams.probMoveJoin, 0.0), 1.0);
-        
-        if (birdParams.isInvalid()) {
+        if (!birdParams.isInvalid()) {
+            bird.position = birdParams;
+        } else {
             walk(birdIndex);
         }
     }
@@ -110,13 +126,16 @@ public class Metabirds extends AFB<AFBParams> {
     @Override
     void fly(int birdIndex) {
         Bird<AFBParams> bird = this.birds.get(birdIndex);
-        AFBParams birdParams = bird.position;
+        AFBParams birdParams = new AFBParams(bird.position);
+        birdParams.n_birds = rand.nextInt(100) + 2;
         birdParams.smallBirdRatio = rand.nextDouble();
         birdParams.probMoveRandom = rand.nextDouble();
         birdParams.probMoveBest = rand.nextDouble();
         birdParams.probMoveJoin = rand.nextDouble();
         
-        if (birdParams.isInvalid()) {
+        if (!birdParams.isInvalid()) {
+            bird.position = birdParams;
+        } else {
             fly(birdIndex);
         }
     }
@@ -126,9 +145,9 @@ public class Metabirds extends AFB<AFBParams> {
         Logger.log("[DEBUG]: Meta-Iteration: " + this.curr_iters);
         Bird<AFBParams> bird = this.birds.get(birdIndex);
         Logger.printLogs = false;
-        int max_iters = 500;
+        int max_iters = 100000;
         AFB_TSP solver = new AFB_TSP(
-            this.n_birds,
+            bird.position.n_birds,
             bird.position.probMoveRandom,
             bird.position.probMoveBest,
             bird.position.probMoveJoin,
@@ -138,7 +157,7 @@ public class Metabirds extends AFB<AFBParams> {
             this.rand
         );
         
-        int repetitions = 32;
+        int repetitions = 4;
         double cost = 0.0;
         for (int i = 0; i < repetitions; i++) {
             solver.init();

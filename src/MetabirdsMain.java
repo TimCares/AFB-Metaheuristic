@@ -9,20 +9,21 @@ public class MetabirdsMain {
 
         Random rand = new Random();
 
-        // Distance: 2946.7310961181465
-        // Time: 68.2301 seconds
+        // Distance: 686.5986551818119
+        // Time: 379.291 seconds
         // Params: 
-        // smallBirdRatio: 0.32521985655768404
-        // probMoveRandom: 0.1994471140145183
-        // probMoveBest: 0.08468770839867434
-        // probMoveJoin: 0.5209509665351663
+        // n_birds: 3 // Interesting, this is the minimum!
+        // smallBirdRatio: 0.6979749881176104
+        // probMoveRandom: 0.1589684022681154
+        // probMoveBest: 0.4624556400235943
+        // probMoveJoin: 0.33611898159023834
         Metabirds metaSolver = new Metabirds(
-            200,
-            0.1,
-            0.07,
-            0.07,
-            1.00,
-            100,
+            8,
+            0.19,
+            0.085,
+            0.52,
+            0.32521985655768404,
+            1024,
             rand
         );
         metaSolver.init();
@@ -38,6 +39,7 @@ public class MetabirdsMain {
         System.out.println("Distance: " + res.bestCost);
         System.out.println("Time: " + df.format(time) + " seconds");
         System.out.println("Params: ");
+        System.out.println("n_birds: " + res.bestPosition.n_birds);
         System.out.println("smallBirdRatio: " + res.bestPosition.smallBirdRatio);
         System.out.println("probMoveRandom: " + res.bestPosition.probMoveRandom);
         System.out.println("probMoveBest: " + res.bestPosition.probMoveBest);
