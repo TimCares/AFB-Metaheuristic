@@ -68,6 +68,7 @@ public class AFB_TSP extends AFB<int[]> {
         for (int j = 1; j < this.n_cities; j++) {
             cost += this.tsp[route[j-1]][route[j]];
         }
+        cost += this.tsp[route[this.n_cities-1]][route[0]];
         bird.cost = cost;
         this.curr_iters++;
     }
