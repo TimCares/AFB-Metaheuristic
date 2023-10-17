@@ -55,14 +55,11 @@ public class AFB_TSP extends AFB<int[]> {
             newBird.bestCost = newBird.cost;
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
-        this.curr_iters = 0; // just now, because we call 'cost' above
         Logger.log("[DEBUG]: Initialization done.");
     }
 
     @Override
     void cost(int birdIndex) { // after each iteration for each bird simultaneously?
-        if ((this.curr_iters % 100) == 0) Logger.log("[DEBUG]: Iteration: " + this.curr_iters);
-
         Bird<int[]> bird = this.birds.get(birdIndex);
         int[] route = bird.position;
         double cost = 0;
@@ -71,7 +68,6 @@ public class AFB_TSP extends AFB<int[]> {
         }
         cost += this.tsp[route[this.n_cities-1]][route[0]];
         bird.cost = cost;
-        this.curr_iters++;
     }
 
     @Override
@@ -95,19 +91,17 @@ public class AFB_TSP extends AFB<int[]> {
             int delta_new = findPositionOfCityInTour(bird.position[k], otherBird) - findPositionOfCityInTour(bird.position[k-1], otherBird);
             int delta_new_abs = Math.abs(delta_new);
             if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
-                delta = delta_new_abs;//delta_new;
+                delta = delta_new;
                 break;
             }
         }
         assert k != -1;
-        /*if (this.n_birds <= 3) { TODO: Why?
-            delta = 2;
-        } else*/
         if (delta == 0) {
             delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1
             assert delta >= 2 && delta <= this.n_birds-1;
         }
-        int l = (k + delta) % this.n_cities;
+        int l = (k + delta + this.n_cities) % this.n_cities;
+        assert l >= 0;
         if (k > l) {
             int tmp = k;
             k = l;
@@ -120,7 +114,10 @@ public class AFB_TSP extends AFB<int[]> {
     
     // Reverses the order of the elements in the range [startInclusive, endExclusive) of the given array.
     public static void reverseInRange(int[] route, int startInclusive, int endExclusive) {
-        for (int u = startInclusive, v = endExclusive-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
+        int start = Math.min(startInclusive, endExclusive);
+        int end = Math.max(startInclusive, endExclusive);
+        assert start <= end;
+        for (int u = start, v = end-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
             int temp = route[u];
             route[u] = route[v];
             route[v] = temp;

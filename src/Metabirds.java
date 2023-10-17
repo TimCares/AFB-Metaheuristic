@@ -94,7 +94,6 @@ public class Metabirds extends AFB<AFBParams> {
             newBird.bestCost = newBird.cost;
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
-        this.curr_iters = 0;
     }
 
     @Override
@@ -142,7 +141,6 @@ public class Metabirds extends AFB<AFBParams> {
 
     @Override
     void cost(int birdIndex) {
-        Logger.log("[DEBUG]: Meta-Iteration: " + this.curr_iters);
         Bird<AFBParams> bird = this.birds.get(birdIndex);
         Logger.printLogs = false;
         int max_iters = 100000;
@@ -165,7 +163,6 @@ public class Metabirds extends AFB<AFBParams> {
             cost += result.bestCost / repetitions;
         }
         bird.cost = cost;
-        this.curr_iters++;
         Logger.printLogs = true;
     }
     

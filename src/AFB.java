@@ -17,12 +17,10 @@ abstract public class AFB<T> {
 
     // The maximum evalutations of the cost function.
     protected int max_iters;
-    protected int curr_iters;
+    private int curr_iters;
     protected Random rand;
 
     protected double rangeDiff;
-
-    //boolean[][] visited = new boolean[][] {}; later (from Tabu search)?
 
     public AFB(
         int n_birds,
@@ -75,7 +73,9 @@ abstract public class AFB<T> {
 
     public AFBResult<T> solve() {
         init();
+        this.curr_iters = 0;
 
+        long start = System.currentTimeMillis();
         while (this.curr_iters < this.max_iters) {
             for (int i = 0; i < this.n_birds; i++) { // multiprocessing?
                 Bird<T> bird = this.birds.get(i);
@@ -86,10 +86,12 @@ abstract public class AFB<T> {
                     case Walk:
                         walk(i);
                         cost(i);
+                        this.curr_iters++;
                         break;
                     case FlyRandom:
                         fly(i);
                         cost(i);
+                        this.curr_iters++;
                         break;
                     case FlyBest:
                         bird.position = clone(bird.bestPosition);
@@ -111,6 +113,7 @@ abstract public class AFB<T> {
                 }
             }
         }
+        long time = (System.currentTimeMillis() - start);
         
         
         int bestBirdIndex = -1;
@@ -126,7 +129,8 @@ abstract public class AFB<T> {
 
         return new AFBResult<T>(
             this.birds.get(bestBirdIndex).bestPosition,
-            bestCost
+            bestCost,
+            time
         );
     }
 
