@@ -2,6 +2,7 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class AFB_TSP extends AFB<int[]> {
     protected int n_cities;
@@ -76,7 +77,7 @@ public class AFB_TSP extends AFB<int[]> {
     @Override
     void fly(int birdIndex) {
         Bird<int[]> bird = this.birds.get(birdIndex);
-        ArrayList<Integer> boxedRoute = new ArrayList<>(Arrays.stream(bird.position).boxed().toList());
+        ArrayList<Integer> boxedRoute = Arrays.stream(bird.position).boxed().collect(Collectors.toCollection(ArrayList::new));
         Collections.shuffle(boxedRoute);
         bird.position = boxedRoute.stream().mapToInt(i -> i).toArray();
     }

@@ -49,6 +49,7 @@ abstract public class AFB<T> {
             throw new Error("Probabilities can't add up to more than 100%");
         }
         this.rand = rand;
+        this.rangeDiff = 1.0 - this.probMoveJoin;
     }
 
     private BirdMove determineNextMove(Bird<T> bird) {
@@ -62,7 +63,7 @@ abstract public class AFB<T> {
             return BirdMove.FlyBest;
         }
 
-        double p = this.rand.nextDouble(this.probMoveWalk + this.probMoveRandom + this.probMoveBest);
+        double p = this.rand.nextDouble()*this.rangeDiff + this.probMoveJoin;
         if (p <= this.probMoveWalk) {
             return BirdMove.Walk;
         } else if (p <= this.probMoveWalk + this.probMoveRandom) {
