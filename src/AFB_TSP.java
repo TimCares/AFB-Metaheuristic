@@ -59,7 +59,7 @@ public class AFB_TSP extends AFB<int[]> {
     }
 
     @Override
-    void cost(int birdIndex) { // after each iteration for each bird simultaneously?
+    void cost(int birdIndex) {
         Bird<int[]> bird = this.birds.get(birdIndex);
         int[] route = bird.position;
         double cost = 0;

@@ -1,5 +1,5 @@
 .PHONY: run
-run: Main.class AFB.class AFBResult.class AFB_TSP.class AFB_TSP_Swap.class BirdMove.class Logger.class
+run: Main.class AFB.class result_src.AFBResult.class AFB_TSP.class AFB_TSP_Swap.class BirdMove.class Logger.class
 	java -Xms6g -Xmx10g Main
 
 .PHONY: clean
@@ -7,7 +7,7 @@ clean:
 	rm ./*.class
 
 .PHONY: test
-test: Test.class AFB.class AFBResult.class AFB_TSP.class AFB_TSP_Swap.class BirdMove.class Logger.class
+test: Test.class AFB.class result_src.AFBResult.class AFB_TSP.class AFB_TSP_Swap.class BirdMove.class Logger.class
 	java -ea -Xms6g -Xmx10g Test
 
 Main.class: Main.java
@@ -16,8 +16,8 @@ Main.class: Main.java
 AFB.class: AFB.java
 	javac AFB.java
 
-AFBResult.class: AFBResult.java
-	javac AFBResult.java
+result_src.AFBResult.class: result_src.AFBResult.java
+	javac result_src.AFBResult.java
 
 AFB_TSP.class: AFB_TSP.java
 	javac AFB_TSP.java

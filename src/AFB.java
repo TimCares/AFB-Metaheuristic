@@ -1,3 +1,5 @@
+import result_src.AFBResult;
+
 import java.util.Random;
 import java.util.ArrayList;
 
@@ -17,7 +19,7 @@ abstract public class AFB<T> {
 
     // The maximum evalutations of the cost function.
     protected int max_iters;
-    private int curr_iters;
+    protected int curr_iters;
     protected Random rand;
 
     protected double rangeDiff;
@@ -50,7 +52,7 @@ abstract public class AFB<T> {
         this.rangeDiff = 1.0 - this.probMoveJoin;
     }
 
-    private BirdMove determineNextMove(Bird<T> bird) {
+    protected BirdMove determineNextMove(Bird<T> bird) {
         if (bird.lastMove.isFlying()
          || bird.position.equals(bird.bestPosition)) {
             // If the bird just flew or is at the best position yet, always walk.
@@ -71,13 +73,13 @@ abstract public class AFB<T> {
         }
     }
 
-    public AFBResult<T> solve() {
+    protected AFBResult<T> solve() {
         init();
         this.curr_iters = 0;
 
         long start = System.currentTimeMillis();
         while (this.curr_iters < this.max_iters) {
-            for (int i = 0; i < this.n_birds; i++) { // multiprocessing?
+            for (int i = 0; i < this.n_birds; i++) {
                 Bird<T> bird = this.birds.get(i);
                 BirdMove nextMove = determineNextMove(bird);
 

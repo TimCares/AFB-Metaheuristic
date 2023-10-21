@@ -1,25 +1,22 @@
+import result_src.AFBResult;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
         // Pa561 optimal route => 2763
-        //String xmlFilePath = "../data/pa561/pa561.xml";
-        //String xmlFilePath = "../data/pa561/pa561.xml";
-        String xmlFilePath = "./data/eil101/eil101.xml";
-        //String xmlFilePath = "../data/rl5934/rl5934.xml";
-        //double[][] tsp = TSPLoader.readTSP("../data/tsp_3.txt");
-        //double[][] tsp = createRandomTSP(10);
+        //String xmlFilePath = "../data/pa561.xml";
+        //String xmlFilePath = "../data/pa561.xml";
+        String xmlFilePath = "./data/eil101.xml";
+        //String xmlFilePath = "../data/rl5934.xml";
         double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
-
-        /*
-        for (double[] row : tsp) {
-            for (double cost : row) {
-                System.out.printf("%10f ", cost);
-            }
-            System.out.println();
-        }*/
 
         System.out.println();
 
