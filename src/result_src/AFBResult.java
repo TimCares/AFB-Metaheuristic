@@ -1,3 +1,5 @@
+package result_src;
+
 public class AFBResult<T> {
   public T bestPosition;
   public double bestCost;
