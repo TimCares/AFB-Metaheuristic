@@ -117,15 +117,15 @@ public class StatsCreator {
     }
 
     public Set<String> listFiles() {
-        return Stream.of(Objects.requireNonNull(new File("./data/").listFiles()))
+        return Stream.of(Objects.requireNonNull(new File("./data/xml/").listFiles()))
                 .filter(file -> !file.isDirectory())
                 .map(File::getName)
-                .map((x) -> "./data/" + x)
+                .map((x) -> "./data/xml/" + x)
                 .collect(Collectors.toSet());
     }
 
     public String getProblemName(String fileName) {
-        Pattern pattern = Pattern.compile("data/(.*).xml");
+        Pattern pattern = Pattern.compile("xml/(.*).xml");
         Matcher matcher = pattern.matcher(fileName);
         matcher.find();
         return matcher.group(1);

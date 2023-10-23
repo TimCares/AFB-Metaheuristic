@@ -9,72 +9,81 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws IOException {
         boolean statistics = false;
+        boolean all = true;
+
+        StatsCreator statsCreator = new StatsCreator();
         if (statistics) {
-            StatsCreator statsCreator = new StatsCreator();
             statsCreator.collectStatistics();
             return;
         }
 
-        // Pa561 optimal route => 2763
-        //String xmlFilePath = "../data/pa561.xml";
-        //String xmlFilePath = "../data/pa561.xml";
-        String xmlFilePath = "./data/eil101.xml";
-        //String xmlFilePath = "../data/rl5934.xml";
-        double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
+        Set<String> files;
+        if (!all) {
+            Stream<String> stringStream = Stream.of("./data/xml/eil101.xml");
+            files = stringStream.collect(Collectors.toSet());
+        } else {
+            files = statsCreator.listFiles();
+        }
 
-        Dataset dataset = Parser.read("./data/eil101.tsp");
-        Fitness fitness = new Fitness(dataset);
-
-        System.out.println("Solving...");
-
-        Random rand = new Random();
-        AFB<int[]> solver = new AFB_TSP(
-            200,
-            0.01,
-            0.67,
-            0.07,
-            1.00,
-            1000,
-            tsp,
-            rand
-        );
-
-        int repeat = 1;
         double times = 0;
         double distance = 0;
         AFBResult<int[]> res = null;
-        for (int i=0; i<repeat; i++) {
+
+        for (String xmlFilePath : files) {
+            double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
+            Dataset dataset = Parser.read(xmlFilePath.replaceAll("xml", "tsp"));
+            Fitness fitness = new Fitness(dataset);
+
+            Random rand = new Random();
+            rand.setSeed(42);
+
+            AFB<int[]> solver = new AFB_TSP(
+                200,
+                0.01,
+                0.67,
+                0.07,
+                1.00,
+                1000,
+                tsp,
+                rand
+            );
+
             long start = System.currentTimeMillis();
             res = solver.solve();
             times += (System.currentTimeMillis() - start) / 1000F;
             distance += res.bestCost;
+            int[] tour = res.bestPosition;
+
+            ArrayList<Evaluable> examples = new ArrayList<>();
+            for (int j=0; j< tour.length; j++) {
+                tour[j]++;
+            }
+            ExamplePath solution = new ExamplePath(tour);
+            examples.add(solution);
+
+            fitness.evaluate(examples);
+
+            System.out.println("\nResult:");
+            System.out.println("\tFitness: " + examples.get(0).getFitness());
+            System.out.println("\tPath: " + examples.get(0).getPath());
+            if (!examples.get(0).isValid()) {
+                System.out.println("\tERROR!");
+                System.out.println("\t" + examples.get(0).getErrorCode());
+            }
+            System.out.println();
         }
-
-        int[] tour = res.bestPosition;
-
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);
-        System.out.println();
-        System.out.println("Distance: " + distance/repeat);
-        System.out.println("Time: " + df.format(times/repeat) + " seconds");
-
-        ArrayList<Evaluable> examples = new ArrayList<>();
-        for (int i=0; i< tour.length; i++) {
-            tour[i]++;
-        }
-        ExamplePath solution = new ExamplePath(tour);
-        examples.add(solution);
-
-        fitness.evaluate(examples);
-
-        for(Evaluable x : examples){
-            System.out.println(String.format("%s -- %5d -- %s", x.getPath() , x.getFitness() , x.isValid()));
-            System.out.println(x.getErrorCode());
-        }
+        System.out.println("\nCombined Results: ");
+        System.out.println("\tAvg. Distance: " + Math.round(distance/files.size()));
+        System.out.println("\tAvg. Time: " + df.format(times/files.size()) + " seconds");
     }
 }
 
