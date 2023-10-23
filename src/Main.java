@@ -1,27 +1,21 @@
+import com.hsh.Evaluable;
+import com.hsh.Fitness;
+import com.hsh.parser.Dataset;
+import com.hsh.parser.Parser;
 import result_src.AFBResult;
-import result_src.AFBResultStats;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.ArrayList;
 import java.util.Random;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
-    public static void main(String[] args) {
-        boolean statistics = true;
+    public static void main(String[] args) throws IOException {
+        boolean statistics = false;
         if (statistics) {
-            collectStatistics();
+            StatsCreator statsCreator = new StatsCreator();
+            statsCreator.collectStatistics();
             return;
         }
 
@@ -31,6 +25,9 @@ public class Main {
         String xmlFilePath = "./data/eil101.xml";
         //String xmlFilePath = "../data/rl5934.xml";
         double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
+
+        Dataset dataset = Parser.read("./data/eil101.tsp");
+        Fitness fitness = new Fitness(dataset);
 
         System.out.println("Solving...");
 
@@ -58,78 +55,41 @@ public class Main {
         }
 
         int[] tour = res.bestPosition;
-        for (int i=0; i<tour.length; i++) {
-            System.out.print(tour[i]);
-            if (i != tour.length-1) {
-                System.out.print(" -> ");
-            }
-            if ((i%20)==0 && i!=0) {
-                System.out.println();
-            }
-        }
+
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);
         System.out.println();
         System.out.println("Distance: " + distance/repeat);
         System.out.println("Time: " + df.format(times/repeat) + " seconds");
-    }
 
-    public static void collectStatistics() {
-        Random rand = null;
-        AFB<int[]> solver = null;
-        AFBResultStats<int[]> res = null;
-        double times = 0;
-
-        Set<String> files = listFiles();
-
-        for (String path: files) {
-            rand = new Random();
-            rand.setSeed(42);
-
-            solver = new AFB_TSP_Track(
-                    200,
-                    0.01,
-                    0.67,
-                    0.07,
-                    1.00,
-                    300000,
-                    Objects.requireNonNull(TSPLoader.generateTSPMatrix(path)),
-                    rand
-            );
-
-            res = (AFBResultStats<int[]>) solver.solve();
-            System.out.println("Cost for \"" + path + "\": " + res.bestCost);
-            times += res.timeInMs;
-            to_csv(path, res);
+        ArrayList<Evaluable> examples = new ArrayList<>();
+        for (int i=0; i< tour.length; i++) {
+            tour[i]++;
         }
-        System.out.println("Avg. Time: " + times/files.size() + " ms");
-    }
+        ExamplePath solution = new ExamplePath(tour);
+        examples.add(solution);
 
-    public static void to_csv(String fileName, AFBResultStats<int[]> results) {
-        Pattern pattern = Pattern.compile("data/(.*).xml");
-        Matcher matcher = pattern.matcher(fileName);
-        matcher.find();
+        fitness.evaluate(examples);
 
-        LocalDateTime timePoint = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy, hh:mm");
-
-        fileName = "./data/experiments/" + matcher.group(1) + " " + timePoint.format(formatter) + ".csv";
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            for (Double value : results.costOverTime) {
-                writer.append(value.toString());
-                writer.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        for(Evaluable x : examples){
+            System.out.println(String.format("%s -- %5d -- %s", x.getPath() , x.getFitness() , x.isValid()));
+            System.out.println(x.getErrorCode());
         }
     }
-    public static Set<String> listFiles() {
-        return Stream.of(Objects.requireNonNull(new File("./data/").listFiles()))
-                .filter(file -> !file.isDirectory())
-                .map(File::getName)
-                .map((x) -> "./data/" + x)
-                .collect(Collectors.toSet());
+}
+
+class ExamplePath extends Evaluable{
+    ArrayList<Integer> path;
+    public ExamplePath(int[] path) {
+        // wandelt int[] in eine ArrayList um
+        this.path = new ArrayList<>();
+        for(int x : path){
+            this.path.add(x);
+        }
     }
 
+    @Override
+    public ArrayList<Integer> getPath() {
+        return path;
+    }
 }
