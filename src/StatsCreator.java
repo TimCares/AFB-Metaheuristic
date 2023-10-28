@@ -117,10 +117,10 @@ public class StatsCreator {
     }
 
     public Set<String> listFiles() {
-        return Stream.of(Objects.requireNonNull(new File("./data/xml/").listFiles()))
+        return Stream.of(Objects.requireNonNull(new File("./data/tsp/").listFiles()))
                 .filter(file -> !file.isDirectory())
                 .map(File::getName)
-                .map((x) -> "./data/xml/" + x)
+                .map((x) -> "./data/tsp/" + x)
                 .collect(Collectors.toSet());
     }
 

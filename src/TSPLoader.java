@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.hsh.parser.*;
+
 public class TSPLoader {
     public static double[][] generateTSPMatrix(String xmlFilePath) {
         try {
@@ -49,7 +51,7 @@ public class TSPLoader {
                         Element edge = (Element) edgeList.item(j);
                         cost = Double.parseDouble(edge.getAttribute("cost"));
                     }
-                    adjacencyMatrix[i][j] = cost;
+                    adjacencyMatrix[i][j] = Math.round(cost);
                 }
             }
 
@@ -111,5 +113,19 @@ public class TSPLoader {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static double[][] generateTSPFromNodes(Node[] nodes) {
+        double[][] tsp = new double[nodes.length][nodes.length];
+        for (int i=0; i<nodes.length; i++) {
+            for (int j=0; j<nodes.length; j++) {
+                if (i==j) {
+                    tsp[i][j] = 0;
+                } else {
+                    tsp[i][j] = nodes[i].distance(nodes[j]);
+                }
+            }
+        }
+        return tsp;
     }
 }

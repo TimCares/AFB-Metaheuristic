@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {     
         boolean statistics = false;
         boolean all = true;
 
@@ -26,7 +26,7 @@ public class Main {
 
         Set<String> files;
         if (!all) {
-            Stream<String> stringStream = Stream.of("./data/xml/eil101.xml");
+            Stream<String> stringStream = Stream.of("./data/tsp/eil101.tsp");
             files = stringStream.collect(Collectors.toSet());
         } else {
             files = statsCreator.listFiles();
@@ -36,9 +36,11 @@ public class Main {
         double distance = 0;
         AFBResult<int[]> res = null;
 
-        for (String xmlFilePath : files) {
-            double[][] tsp = TSPLoader.generateTSPMatrix(xmlFilePath);
-            Dataset dataset = Parser.read(xmlFilePath.replaceAll("xml", "tsp"));
+        for (String filePath : files) {
+            System.out.println("Problem: " + filePath);
+
+            Dataset dataset = Parser.read(filePath);
+            double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
             Fitness fitness = new Fitness(dataset);
 
             Random rand = new Random();
