@@ -60,7 +60,7 @@ abstract public class AFB<T> {
         }
         if (bird.isBigBird && rand.nextDouble() < this.probMoveJoin) {
             // A small bird does not join other birds.
-            return BirdMove.FlyBest;
+            return BirdMove.FlyToOtherBird;
         }
 
         double p = this.rand.nextDouble()*this.rangeDiff + this.probMoveJoin;
@@ -109,7 +109,7 @@ abstract public class AFB<T> {
                         break;
                 }
                 
-                if (bird.cost < bird.bestCost) {
+                if (bird.cost <= bird.bestCost) {
                     bird.bestPosition = clone(bird.position);
                     bird.bestCost = bird.cost;
                 }
