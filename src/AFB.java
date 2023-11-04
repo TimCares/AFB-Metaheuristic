@@ -118,20 +118,11 @@ abstract public class AFB<T> {
         long time = (System.currentTimeMillis() - start);
         
         
-        int bestBirdIndex = -1;
-        double bestCost = Double.MAX_VALUE;
-        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
-            Bird<T> bird = this.birds.get(birdIndex);
-            if (bird.bestCost < bestCost) {
-                bestCost = bird.bestCost;
-                bestBirdIndex = birdIndex;
-            }
-        }
-        assert bestBirdIndex != -1;
+        int bestBirdIndex = calcBestResult();
 
         return new AFBResult<T>(
             this.birds.get(bestBirdIndex).bestPosition,
-            bestCost,
+            this.birds.get(bestBirdIndex).bestCost,
             time
         );
     }
@@ -150,6 +141,20 @@ abstract public class AFB<T> {
             j = this.rand.nextInt(this.n_birds);
         }
         return this.birds.get(j);
+    }
+
+    protected int calcBestResult() {
+        int bestBirdIndex = -1;
+        double bestCost = Double.MAX_VALUE;
+        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
+            Bird<T> bird = this.birds.get(birdIndex);
+            if (bird.bestCost < bestCost) {
+                bestCost = bird.bestCost;
+                bestBirdIndex = birdIndex;
+            }
+        }
+        assert bestBirdIndex != -1;
+        return bestBirdIndex;
     }
 
 }

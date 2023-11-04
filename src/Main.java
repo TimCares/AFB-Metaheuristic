@@ -31,6 +31,10 @@ public class Main {
 
         double times = 0;
         double distance = 0;
+        double[] distances = new double[files.size()];
+        double[] timesArray = new double[files.size()];
+        int i = 0;
+
         AFBResult<int[]> res = null;
 
         for (String filePath : files) {
@@ -43,7 +47,7 @@ public class Main {
             Random rand = new Random();
             rand.setSeed(42);
 
-            AFB<int[]> solver = new AFB_TSP(
+            AFB<int[]> solver = new AFB_TSP_Swap(
                 200,
                 0.1589684022681154,//0.01,
                 0.4624556400235943, //0.67,
@@ -56,8 +60,15 @@ public class Main {
 
             long start = System.currentTimeMillis();
             res = solver.solve();
-            times += (System.currentTimeMillis() - start) / 1000F;
+            double time = (System.currentTimeMillis() - start) / 1000F;
+
+            times += time;
             distance += res.bestCost;
+
+            distances[i] = res.bestCost;
+            timesArray[i] = time;
+            i++;
+
             int[] tour = res.bestPosition;
 
             ArrayList<Evaluable> examples = new ArrayList<>();
@@ -83,6 +94,17 @@ public class Main {
         System.out.println("\nCombined Results: ");
         System.out.println("\tAvg. Distance: " + Math.round(distance/files.size()));
         System.out.println("\tAvg. Time: " + df.format(times/files.size()) + " seconds");
+        System.out.println("\tMedian Distance: " + Math.round(median(distances)));
+        System.out.println("\tMedian Time: " + df.format(median(timesArray)) + " seconds");
+    }
+
+    public static double median(double[] m) {
+        int middle = m.length/2;
+        if (m.length%2 == 1) {
+            return m[middle];
+        } else {
+            return (m[middle-1] + m[middle]) / 2.0;
+        }
     }
 }
 

@@ -73,18 +73,4 @@ public class AFB_TSP_Track extends AFB_TSP {
                 this.costOverTime
         );
     }
-
-    private int calcBestResult() {
-        int bestBirdIndex = -1;
-        double bestCost = Double.MAX_VALUE;
-        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
-            Bird<int[]> bird = this.birds.get(birdIndex);
-            if (bird.bestCost < bestCost) {
-                bestCost = bird.bestCost;
-                bestBirdIndex = birdIndex;
-            }
-        }
-        assert bestBirdIndex != -1;
-        return bestBirdIndex;
-    }
 }
