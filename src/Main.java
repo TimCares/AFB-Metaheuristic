@@ -10,8 +10,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) throws IOException {     
@@ -20,16 +18,15 @@ public class Main {
 
         StatsCreator statsCreator = new StatsCreator();
         if (statistics) {
-            statsCreator.collectStatistics();
+            statsCreator.costPerNBirds();
             return;
         }
 
         Set<String> files;
         if (!all) {
-            Stream<String> stringStream = Stream.of("./data/tsp/eil101.tsp");
-            files = stringStream.collect(Collectors.toSet());
+            files = TSPLoader.listFiles("eil101.tsp");
         } else {
-            files = statsCreator.listFiles();
+            files = TSPLoader.listFiles();
         }
 
         double times = 0;
@@ -48,11 +45,11 @@ public class Main {
 
             AFB<int[]> solver = new AFB_TSP(
                 200,
-                0.01,
-                0.67,
-                0.07,
-                1.00,
-                1000,
+                0.1589684022681154,//0.01,
+                0.4624556400235943, //0.67,
+                0.33611898159023834, //0.07,
+                0.6979749881176104, //0.75,
+                2_000_000,
                 tsp,
                 rand
             );

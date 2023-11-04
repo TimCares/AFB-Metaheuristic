@@ -10,8 +10,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.hsh.parser.*;
 
@@ -127,5 +130,19 @@ public class TSPLoader {
             }
         }
         return tsp;
+    }
+
+    public static Set<String> listFiles() {
+        return Stream.of(Objects.requireNonNull(new File("./data/tsp/").listFiles()))
+                .filter(file -> !file.isDirectory())
+                .map(File::getName)
+                .map((x) -> "./data/tsp/" + x)
+                .collect(Collectors.toSet());
+                
+    }
+
+    public static Set<String> listFiles(String file) {
+        Stream<String> stringStream = Stream.of("./data/tsp/" + file);
+        return stringStream.collect(Collectors.toSet());
     }
 }

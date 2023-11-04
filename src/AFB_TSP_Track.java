@@ -57,7 +57,7 @@ public class AFB_TSP_Track extends AFB_TSP {
                         break;
                 }
 
-                if (bird.cost < bird.bestCost) {
+                if (bird.cost <= bird.bestCost) {
                     bird.bestPosition = clone(bird.position);
                     bird.bestCost = bird.cost;
                 }
