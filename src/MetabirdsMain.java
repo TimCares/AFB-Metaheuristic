@@ -26,7 +26,8 @@ public class MetabirdsMain {
             0.52,
             0.32521985655768404,
             1024,
-            rand
+            rand,
+            0.25
         );
         metaSolver.init();
 

@@ -10,9 +10,10 @@ public class AFB_TSP_Swap extends AFB_TSP {
         double smallBirdRatio,
         int max_iters,
         double[][] tsp,
-        Random rand
+        Random rand,
+        double joinTop
     ) {
-      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
+      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
     }
 
     // Performs a random swap of two cities for local search.

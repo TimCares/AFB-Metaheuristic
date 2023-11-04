@@ -8,11 +8,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -144,5 +150,26 @@ public class TSPLoader {
     public static Set<String> listFiles(String file) {
         Stream<String> stringStream = Stream.of("./data/tsp/" + file);
         return stringStream.collect(Collectors.toSet());
+    }
+
+    public static Map<String, Integer> getBestCosts() {
+        Map<String, Integer> resultMap = new HashMap<>();
+        try {
+        List<String> lines = Files.readAllLines(Paths.get("./data/tsp_opt.txt"));
+            for (String line : lines) {
+                String[] parts = line.split(" : ");
+                resultMap.put(parts[0], Integer.parseInt(parts[1]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return resultMap;
+    }
+
+    public static String getProblemName(String fileName) {
+        Pattern pattern = Pattern.compile("tsp/(.*).tsp");
+        Matcher matcher = pattern.matcher(fileName);
+        matcher.find();
+        return matcher.group(1);
     }
 }

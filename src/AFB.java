@@ -2,6 +2,8 @@ import result_src.AFBResult;
 
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
+import java.util.Comparator;
 
 // A generic implementation of the Artificial Feeding Birds metaheuristic.
 // The type `T` is the type of the position of a bird in the search space.
@@ -24,6 +26,9 @@ abstract public class AFB<T> {
 
     protected double rangeDiff;
 
+    protected int[] birdOrder;
+    protected int joinTopN; // The number of best performing birds to join.
+
     public AFB(
         int n_birds,
         double probMoveRandom,
@@ -31,7 +36,8 @@ abstract public class AFB<T> {
         double probMoveJoin,
         double smallBirdRatio,
         int max_iters,
-        Random rand
+        Random rand,
+        double joinTop
     ) {
         // configuration
         this.n_birds = n_birds;
@@ -50,6 +56,7 @@ abstract public class AFB<T> {
         }
         this.rand = rand;
         this.rangeDiff = 1.0 - this.probMoveJoin;
+        this.joinTopN = (int) (joinTop*this.n_birds);
     }
 
     protected BirdMove determineNextMove(Bird<T> bird) {
@@ -75,6 +82,7 @@ abstract public class AFB<T> {
 
     protected AFBResult<T> solve() {
         init();
+        calcBestResult(); // Initialize birdOrder
         this.curr_iters = 0;
 
         long start = System.currentTimeMillis();
@@ -138,12 +146,21 @@ abstract public class AFB<T> {
     protected Bird<T> randomBirdExcept(int excludedBirdIndex) {
         int j = excludedBirdIndex;
         while (j == excludedBirdIndex) {
-            j = this.rand.nextInt(this.n_birds);
+            j = this.rand.nextInt(this.joinTopN);
         }
-        return this.birds.get(j);
+        return this.birds.get(this.birdOrder[j]);
     }
 
     protected int calcBestResult() {
+        this.birdOrder = IntStream.range(0, this.birds.size())
+            .boxed()
+            .sorted(Comparator.comparing(i -> this.birds.get(i).bestCost))
+            .mapToInt(Integer::intValue)
+            .toArray();
+        return this.birdOrder[0];
+    }
+
+    protected int calcBestResultOld() {
         int bestBirdIndex = -1;
         double bestCost = Double.MAX_VALUE;
         for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
@@ -157,4 +174,11 @@ abstract public class AFB<T> {
         return bestBirdIndex;
     }
 
+    protected Bird<T> randomBirdExceptOld(int excludedBirdIndex) {
+        int j = excludedBirdIndex;
+        while (j == excludedBirdIndex) {
+            j = this.rand.nextInt(this.n_birds);
+        }
+        return this.birds.get(j);
+    }
 }

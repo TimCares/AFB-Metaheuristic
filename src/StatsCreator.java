@@ -51,14 +51,15 @@ public class StatsCreator {
                         0.6979749881176104, //0.75,
                         5_000_000,
                         tsp,
-                        rand
+                        rand,
+                        0.25
                 );
                 res = (AFBResultStats<int[]>) solver.solve();
                 cost.add(res.bestCost);
                 time.add(res.timeInMs);
             }
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("./data/experiments/" + getProblemName(path) + " " + getCurrTime() + "_birds.csv"))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("./data/experiments/" + TSPLoader.getProblemName(path) + " " + getCurrTime() + "_birds.csv"))) {
                 for (Double value : cost) {
                     writer.append(value.toString());
                     writer.append("\n");
@@ -66,7 +67,7 @@ public class StatsCreator {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("./data/experiments/" + getProblemName(path) + " " + getCurrTime() + "_time.csv"))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("./data/experiments/" + TSPLoader.getProblemName(path) + " " + getCurrTime() + "_time.csv"))) {
                 for (Long value : time) {
                     writer.append(value.toString());
                     writer.append("\n");
@@ -83,7 +84,7 @@ public class StatsCreator {
         AFBResultStats<int[]> res = null;
         double times = 0;
 
-        Set<String> files = TSPLoader.listFiles();
+        Set<String> files = TSPLoader.listFiles("rl5934.tsp");
         Dataset dataset = null;
         double[][] tsp = null;
 
@@ -103,20 +104,21 @@ public class StatsCreator {
             rand.setSeed(42);
 
             solver = new AFB_TSP_Track(
-                    3,
+                    200,
                     0.1589684022681154,//0.01,
                     0.4624556400235943, //0.67,
                     0.33611898159023834, //0.07,
                     0.6979749881176104, //0.75,
-                    20_000_000,
+                    4_000_000,
                     tsp,
-                    rand
+                    rand,
+                    0.25
             );
 
             res = (AFBResultStats<int[]>) solver.solve();
             System.out.println("Cost for \"" + path + "\": " + res.bestCost);
             times += res.timeInMs;
-            to_csv(getProblemName(path), res);
+            to_csv(TSPLoader.getProblemName(path), res);
         }
         System.out.println("Avg. Time: " + times/files.size() + " ms");
     }
@@ -137,13 +139,6 @@ public class StatsCreator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getProblemName(String fileName) {
-        Pattern pattern = Pattern.compile("tsp/(.*).tsp");
-        Matcher matcher = pattern.matcher(fileName);
-        matcher.find();
-        return matcher.group(1);
     }
 
     public String getCurrTime() {

@@ -16,9 +16,10 @@ public class AFB_TSP extends AFB<int[]> {
         double smallBirdRatio,
         int max_iters,
         double[][] tsp,
-        Random rand
+        Random rand,
+        double joinTop
     ) {
-      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
+      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand, joinTop);
 
       this.n_cities = tsp.length;
       Logger.log("Processing TSP with length " + this.n_cities);

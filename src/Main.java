@@ -8,17 +8,18 @@ import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 public class Main {
-    public static void main(String[] args) throws IOException {     
+    public static void main(String[] args) throws IOException {
         boolean statistics = false;
         boolean all = true;
 
         StatsCreator statsCreator = new StatsCreator();
         if (statistics) {
-            statsCreator.costPerNBirds();
+            statsCreator.collectStatistics();
             return;
         }
 
@@ -28,10 +29,10 @@ public class Main {
         } else {
             files = TSPLoader.listFiles();
         }
+        Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
-        double times = 0;
-        double distance = 0;
         double[] distances = new double[files.size()];
+        double[] error = new double[files.size()];
         double[] timesArray = new double[files.size()];
         int i = 0;
 
@@ -47,7 +48,7 @@ public class Main {
             Random rand = new Random();
             rand.setSeed(42);
 
-            AFB<int[]> solver = new AFB_TSP_Swap(
+            AFB<int[]> solver = new AFB_TSP(
                 200,
                 0.1589684022681154,//0.01,
                 0.4624556400235943, //0.67,
@@ -55,18 +56,17 @@ public class Main {
                 0.6979749881176104, //0.75,
                 2_000_000,
                 tsp,
-                rand
+                rand,
+                0.2
             );
 
             long start = System.currentTimeMillis();
             res = solver.solve();
             double time = (System.currentTimeMillis() - start) / 1000F;
 
-            times += time;
-            distance += res.bestCost;
-
             distances[i] = res.bestCost;
             timesArray[i] = time;
+            error[i] = distances[i] - getBestCosts.get(TSPLoader.getProblemName(filePath));
             i++;
 
             int[] tour = res.bestPosition;
@@ -92,11 +92,25 @@ public class Main {
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);
         System.out.println("\nCombined Results: ");
-        System.out.println("\tAvg. Distance: " + Math.round(distance/files.size()));
-        System.out.println("\tAvg. Time: " + df.format(times/files.size()) + " seconds");
+        System.out.println("\tAvg. Distance: " + Math.round(mean(distances)));
+        System.out.println("\tAvg. Time: " + df.format(mean(timesArray)) + " seconds");
         System.out.println("\tMedian Distance: " + Math.round(median(distances)));
         System.out.println("\tMedian Time: " + df.format(median(timesArray)) + " seconds");
+
+        System.out.println("\nMedian abs Error: " + median(error));
+        System.out.println("Mean abs Error: " + Math.round(mean(error)));
     }
+
+
+
+
+
+
+
+
+
+
+
 
     public static double median(double[] m) {
         int middle = m.length/2;
@@ -105,6 +119,14 @@ public class Main {
         } else {
             return (m[middle-1] + m[middle]) / 2.0;
         }
+    }
+
+    public static double mean(double[] m) {
+        double sum = 0;
+        for (double x : m) {
+            sum += x;
+        }
+        return sum / m.length;
     }
 }
 

@@ -13,14 +13,16 @@ public class AFB_TSP_Track extends AFB_TSP {
             double smallBirdRatio,
             int max_iters,
             double[][] tsp,
-            Random rand
+            Random rand,
+            double joinTop
     ) {
-        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
+        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
         this.costOverTime = new ArrayList<>();
     }
 
     public AFBResultStats<int[]> solve() {
         init();
+        calcBestResult(); // Initialize birdOrder
         this.curr_iters = 0;
 
         long start = System.currentTimeMillis();
@@ -45,7 +47,7 @@ public class AFB_TSP_Track extends AFB_TSP {
                         break;
                     case FlyBest:
                         bird.position = clone(bird.bestPosition);
-                        bird.cost = bird.bestCost;
+                        bird.cost = bird.bestCost; // TODO: Can we update the ranking here?
                         break;
                     case FlyToOtherBird:
                         // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
