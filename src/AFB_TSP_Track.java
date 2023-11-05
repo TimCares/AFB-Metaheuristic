@@ -35,13 +35,13 @@ public class AFB_TSP_Track extends AFB_TSP {
                     case Walk:
                         walk(i);
                         cost(i);
-                        this.costOverTime.add(this.birds.get(calcBestResult()).bestCost);
+                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyRandom:
                         fly(i);
                         cost(i);
-                        this.costOverTime.add(this.birds.get(calcBestResult()).bestCost);
+                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyBest:
@@ -63,6 +63,7 @@ public class AFB_TSP_Track extends AFB_TSP {
                     bird.bestCost = bird.cost;
                 }
             }
+            //calcBestResult();
         }
         long time = (System.currentTimeMillis() - start);
 
@@ -73,5 +74,19 @@ public class AFB_TSP_Track extends AFB_TSP {
                 time,
                 this.costOverTime
         );
+    }
+
+    protected int calcBestResultTrack() {
+        int bestBirdIndex = -1;
+        double bestCost = Double.MAX_VALUE;
+        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
+            Bird<int[]> bird = this.birds.get(birdIndex);
+            if (bird.bestCost < bestCost) {
+                bestCost = bird.bestCost;
+                bestBirdIndex = birdIndex;
+            }
+        }
+        assert bestBirdIndex != -1;
+        return bestBirdIndex;
     }
 }

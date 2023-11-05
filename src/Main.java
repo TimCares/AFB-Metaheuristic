@@ -48,7 +48,7 @@ public class Main {
             Random rand = new Random();
             rand.setSeed(42);
 
-            AFB<int[]> solver = new AFB_TSP(
+            AFB<int[]> solver = new AFB_TSP_TopN(
                 200,
                 0.1589684022681154,//0.01,
                 0.4624556400235943, //0.67,
@@ -57,7 +57,7 @@ public class Main {
                 4_000_000,
                 tsp,
                 rand
-                //0.25
+                ,0.15
             );
 
             long start = System.currentTimeMillis();
