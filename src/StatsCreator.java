@@ -51,8 +51,8 @@ public class StatsCreator {
                         0.6979749881176104, //0.75,
                         5_000_000,
                         tsp,
-                        rand,
-                        0.25
+                        rand
+                        //,0.25
                 );
                 res = (AFBResultStats<int[]>) solver.solve();
                 cost.add(res.bestCost);
@@ -84,7 +84,7 @@ public class StatsCreator {
         AFBResultStats<int[]> res = null;
         double times = 0;
 
-        Set<String> files = TSPLoader.listFiles("rl5934.tsp");
+        Set<String> files = TSPLoader.listFiles("dsj1000.tsp");
         Dataset dataset = null;
         double[][] tsp = null;
 
@@ -111,8 +111,8 @@ public class StatsCreator {
                     0.6979749881176104, //0.75,
                     4_000_000,
                     tsp,
-                    rand,
-                    0.25
+                    rand
+                    //,0.25
             );
 
             res = (AFBResultStats<int[]>) solver.solve();

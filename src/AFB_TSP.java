@@ -16,10 +16,9 @@ public class AFB_TSP extends AFB<int[]> {
         double smallBirdRatio,
         int max_iters,
         double[][] tsp,
-        Random rand,
-        double joinTop
+        Random rand
     ) {
-      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand, joinTop);
+      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
 
       this.n_cities = tsp.length;
       Logger.log("Processing TSP with length " + this.n_cities);
@@ -126,7 +125,7 @@ public class AFB_TSP extends AFB<int[]> {
     }
 
     // Performs a linear search for the position of the city with index 'cityIndex' in the route of bird 'bird'.
-    private int findPositionOfCityInTour(int cityIndex, Bird<int[]> bird) {
+    protected int findPositionOfCityInTour(int cityIndex, Bird<int[]> bird) {
         for (int routeIndex=0; routeIndex<this.n_cities; routeIndex++) {
             if (bird.position[routeIndex] == cityIndex) {
                 return routeIndex;

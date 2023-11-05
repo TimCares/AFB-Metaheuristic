@@ -55,10 +55,9 @@ public class Metabirds extends AFB<AFBParams> {
         double probMoveJoin,
         double smallBirdRatio,
         int max_iters,
-        Random rand,
-        double joinTop
+        Random rand
     ) {
-        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand, joinTop);
+        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
     }
     
     @Override
@@ -155,8 +154,7 @@ public class Metabirds extends AFB<AFBParams> {
             bird.position.smallBirdRatio,
             max_iters,
             this.testTSP,
-            this.rand,
-            0.25
+            this.rand
         );
         
         int repetitions = 4;

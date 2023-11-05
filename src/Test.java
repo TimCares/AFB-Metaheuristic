@@ -7,7 +7,7 @@ public class Test {
     public static void testWalkSwap() {
         double[][] tsp = TSPLoader.createRandomTSP(2);
         Random rand = new Random(42);
-        AFB_TSP solver = new AFB_TSP_Swap(4, 0.01, 0.67, 0.07, 1.00, 1000, tsp, rand, 0.25);
+        AFB_TSP solver = new AFB_TSP_Swap(4, 0.01, 0.67, 0.07, 1.00, 1000, tsp, rand);
         solver.init();
         int[] oldPosition = solver.birds.get(0).position.clone();
         solver.walk(0);
@@ -44,8 +44,7 @@ public class Test {
             smallBirdRatio,
             lowIters,
             tsp,
-            rand,
-            0.25
+            rand
         );
         solverLowIter.init();
         AFBResult<int[]> resLowIter = solverLowIter.solve();
@@ -59,8 +58,7 @@ public class Test {
             smallBirdRatio,
             highIters,
             tsp,
-            rand,
-            0.25
+            rand
         );
         solverHighIter.init();
         AFBResult<int[]> resHighIter = solverHighIter.solve();
