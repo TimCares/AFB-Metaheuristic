@@ -63,6 +63,7 @@ public class AFB_TSP_TopN extends AFB_TSP {
                     bird.bestCost = bird.cost;
                 }
             }
+            calcBestResult();
         }
         long time = (System.currentTimeMillis() - start);
 
