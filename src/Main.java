@@ -33,6 +33,7 @@ public class Main {
 
         double[] distances = new double[files.size()];
         double[] error = new double[files.size()];
+        double[] errorRelative = new double[files.size()];
         double[] timesArray = new double[files.size()];
         int i = 0;
 
@@ -67,6 +68,7 @@ public class Main {
             distances[i] = res.bestCost;
             timesArray[i] = time;
             error[i] = distances[i] - getBestCosts.get(TSPLoader.getProblemName(filePath));
+            errorRelative[i] = error[i] / getBestCosts.get(TSPLoader.getProblemName(filePath));
             i++;
 
             int[] tour = res.bestPosition;
@@ -99,18 +101,17 @@ public class Main {
 
         System.out.println("\nMedian abs Error: " + median(error));
         System.out.println("Mean abs Error: " + Math.round(mean(error)));
+
+        System.out.println("\nMedian rel Error: " + doubleAsPercent(median(errorRelative)));
+        System.out.println("Mean rel Error: " + doubleAsPercent(mean(errorRelative)));
     }
 
-
-
-
-
-
-
-
-
-
-
+    // Print a double as a percent value with two decimal places
+    public static String doubleAsPercent(double value) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.CEILING);
+        return df.format(value * 100) + "%";
+    }
 
     public static double median(double[] m) {
         int middle = m.length/2;
