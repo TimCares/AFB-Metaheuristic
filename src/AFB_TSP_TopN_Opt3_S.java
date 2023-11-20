@@ -1,8 +1,8 @@
 import java.util.Random;
 
-// AFB for TSP without locality estimation and 3-opt local search.
-public class AFB_TSP_TopN_Opt3 extends AFB_TSP_TopN {
-    public AFB_TSP_TopN_Opt3(
+// AFB for TSP without locality estimation and 3-opt local search only for big birds.
+public class AFB_TSP_TopN_Opt3_S extends AFB_TSP_TopN {
+    public AFB_TSP_TopN_Opt3_S(
             int n_birds,
             double probMoveRandom,
             double probMoveBest,
@@ -17,6 +17,14 @@ public class AFB_TSP_TopN_Opt3 extends AFB_TSP_TopN {
     }
 
     void walk(int i) {
+        if (this.birds.get(i).isBigBird) {
+            opt_3(i);
+        } else {
+            opt_2(i);
+        }
+    }
+
+    void opt_3(int i) {
         // 3-opt local search
         Bird<int[]> bird = this.birds.get(i);
         
@@ -68,6 +76,23 @@ public class AFB_TSP_TopN_Opt3 extends AFB_TSP_TopN {
             }
         }
         
+        bird.position = newRoute;
+    }
+
+    void opt_2 (int i) {
+        // 2-opt local search
+        Bird<int[]> bird = this.birds.get(i);
+        int k = this.rand.nextInt(this.n_cities - 1) + 1;
+        int delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1
+        int l = (k + delta + this.n_cities) % this.n_cities;
+        assert l >= 0;
+        if (k > l) {
+            int tmp = k;
+            k = l;
+            l = tmp;
+        }
+        int[] newRoute = bird.position.clone();
+        reverseInRange(newRoute, k, l);
         bird.position = newRoute;
     }
 

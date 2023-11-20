@@ -6,6 +6,8 @@ import java.util.stream.IntStream;
 // AFB for TSP with joining of top n birds.
 public class AFB_TSP_TopN extends AFB_TSP {
     private int joinTopN; // The number of best performing birds to join.
+    private int[] birdOrder;
+    
     public AFB_TSP_TopN(
             int n_birds,
             double probMoveRandom,
@@ -46,11 +48,9 @@ public class AFB_TSP_TopN extends AFB_TSP {
                         break;
                     case FlyBest:
                         bird.position = clone(bird.bestPosition);
-                        bird.cost = bird.bestCost; // TODO: Can we update the ranking here?
+                        bird.cost = bird.bestCost;
                         break;
                     case FlyToOtherBird:
-                        // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
-
                         // Exclude i so the bird doesn't join itself
                         Bird<int[]> otherBird = randomBirdExcept(i);
                         bird.position = clone(otherBird.position);

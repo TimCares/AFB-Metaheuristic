@@ -24,8 +24,6 @@ abstract public class AFB<T> {
 
     protected double rangeDiff;
 
-    protected int[] birdOrder;
-
     public AFB(
         int n_birds,
         double probMoveRandom,
@@ -102,8 +100,6 @@ abstract public class AFB<T> {
                         bird.cost = bird.bestCost;
                         break;
                     case FlyToOtherBird:
-                        // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
-
                         // Exclude i so the bird doesn't join itself
                         Bird<T> otherBird = randomBirdExcept(i);
                         bird.position = clone(otherBird.position);

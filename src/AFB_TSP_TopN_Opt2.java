@@ -19,8 +19,8 @@ public class AFB_TSP_TopN_Opt2 extends AFB_TSP_TopN {
     void walk(int i) {
         // 2-opt local search
         Bird<int[]> bird = this.birds.get(i);
-        int delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1;
         int k = this.rand.nextInt(this.n_cities - 1) + 1;
+        int delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1;
         int l = (k + delta + this.n_cities) % this.n_cities;
         assert l >= 0;
         if (k > l) {

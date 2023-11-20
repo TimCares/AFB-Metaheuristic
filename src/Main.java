@@ -49,7 +49,7 @@ public class Main {
             Random rand = new Random();
             rand.setSeed(42);
 
-            AFB<int[]> solver = new AFB_TSP_TopN_Opt3(
+            AFB<int[]> solver = new AFB_TSP_TopN_Opt3_S(
                 200,
                 0.1589684022681154,//0.01,
                 0.4624556400235943, //0.67,
