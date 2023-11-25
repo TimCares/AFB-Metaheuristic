@@ -18,7 +18,7 @@ public class StatsCreator {
         AFB<int[]> solver = null;
         AFBResultStats<int[]> res = null;
 
-        Set<String> files = TSPLoader.listFiles("ali535.tsp");
+        Set<String> files = TSPLoader.listFile("ali535.tsp");
         Dataset dataset = null;
         double[][] tsp = null;
 
@@ -82,7 +82,7 @@ public class StatsCreator {
         AFBResultStats<int[]> res = null;
         double times = 0;
 
-        Set<String> files = TSPLoader.listFiles("dsj1000.tsp");
+        Set<String> files = TSPLoader.listFile("dsj1000.tsp");
         Dataset dataset = null;
         double[][] tsp = null;
 

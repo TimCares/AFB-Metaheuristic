@@ -27,7 +27,7 @@ public class Main {
         if (!all) {
             files = TSPLoader.listFile("eil101.tsp");
         } else {
-            files = TSPLoader.listFiles(false, 100);
+            files = TSPLoader.listFiles(false, 10_000);
         }
         Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
@@ -47,9 +47,9 @@ public class Main {
             Fitness fitness = new Fitness(dataset);
 
             Random rand = new Random();
-            rand.setSeed(42);
+            rand.setSeed(0);
 
-            AFB<int[]> solver = new AFB_TSP_TopN_Opt3_S(
+            AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NFB(
                 200,
                 0.1589684022681154,//0.01,
                 0.4624556400235943, //0.67,
