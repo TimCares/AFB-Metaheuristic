@@ -25,9 +25,9 @@ public class Main {
 
         Set<String> files;
         if (!all) {
-            files = TSPLoader.listFiles("eil101.tsp");
+            files = TSPLoader.listFile("eil101.tsp");
         } else {
-            files = TSPLoader.listFiles();
+            files = TSPLoader.listFiles(false, 100);
         }
         Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
@@ -69,6 +69,7 @@ public class Main {
             timesArray[i] = time;
             error[i] = distances[i] - getBestCosts.get(TSPLoader.getProblemName(filePath));
             errorRelative[i] = error[i] / getBestCosts.get(TSPLoader.getProblemName(filePath));
+            assert errorRelative[i] >= 0;
             i++;
 
             int[] tour = res.bestPosition;
