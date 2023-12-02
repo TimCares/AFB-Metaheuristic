@@ -31,66 +31,71 @@ public class Main {
         }
         Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
-        double[] distances = new double[files.size()];
-        double[] error = new double[files.size()];
-        double[] errorRelative = new double[files.size()];
-        double[] timesArray = new double[files.size()];
+        int n_trails_per_problem = 10;
+
+        int size = files.size() * n_trails_per_problem;
+
+        double[] distances = new double[size];
+        double[] error = new double[size];
+        double[] errorRelative = new double[size];
+        double[] timesArray = new double[size];
         int i = 0;
 
         AFBResult<int[]> res = null;
 
-        for (String filePath : files) {
-            System.out.println("Problem: " + filePath);
+        Random rand = new Random();
 
-            Dataset dataset = Parser.read(filePath);
-            double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
-            Fitness fitness = new Fitness(dataset);
+        for (int k=0; k< n_trails_per_problem; k++) {
+            for (String filePath : files) {
+                System.out.println("Problem: " + filePath);
 
-            Random rand = new Random();
-            rand.setSeed(0);
+                Dataset dataset = Parser.read(filePath);
+                double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
+                Fitness fitness = new Fitness(dataset);
 
-            AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NFB(
-                200,
-                0.1589684022681154,//0.01,
-                0.4624556400235943, //0.67,
-                0.33611898159023834, //0.07,
-                0.6979749881176104, //0.75,
-                4_000_000,
-                tsp,
-                rand
-                ,0.01
-            );
+                AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NFB(
+                    200,
+                    0.1589684022681154,//0.01,
+                    0.4624556400235943, //0.67,
+                    0.33611898159023834, //0.07,
+                    0.6979749881176104, //0.75,
+                    4_000_000,
+                    tsp,
+                    rand
+                    ,0.01
+                );
 
-            long start = System.currentTimeMillis();
-            res = solver.solve();
-            double time = (System.currentTimeMillis() - start) / 1000F;
+                long start = System.currentTimeMillis();
+                res = solver.solve();
+                double time = (System.currentTimeMillis() - start) / 1000F;
 
-            distances[i] = res.bestCost;
-            timesArray[i] = time;
-            error[i] = distances[i] - getBestCosts.get(TSPLoader.getProblemName(filePath));
-            errorRelative[i] = error[i] / getBestCosts.get(TSPLoader.getProblemName(filePath));
-            assert errorRelative[i] >= 0;
-            i++;
+                distances[i] = res.bestCost;
+                timesArray[i] = time;
+                error[i] = distances[i] - getBestCosts.get(TSPLoader.getProblemName(filePath));
+                errorRelative[i] = error[i] / getBestCosts.get(TSPLoader.getProblemName(filePath));
+                assert errorRelative[i] >= 0;
+                i++;
 
-            int[] tour = res.bestPosition;
+                int[] tour = res.bestPosition;
 
-            ArrayList<Evaluable> examples = new ArrayList<>();
-            for (int j=0; j< tour.length; j++) {
-                tour[j]++;
+                ArrayList<Evaluable> examples = new ArrayList<>();
+                for (int j=0; j< tour.length; j++) {
+                    tour[j]++;
+                }
+                ExamplePath solution = new ExamplePath(tour);
+                examples.add(solution);
+
+                fitness.evaluate(examples);
+
+                System.out.println("\nResult:");
+                System.out.println("\tFitness: " + examples.get(0).getFitness());
+                System.out.println("\tPath: " + examples.get(0).getPath());
+                if (!examples.get(0).isValid()) {
+                    System.out.println("\tERROR!");
+                    System.out.println("\t" + examples.get(0).getErrorCode());
+                }
+                System.out.println();
             }
-            ExamplePath solution = new ExamplePath(tour);
-            examples.add(solution);
-
-            fitness.evaluate(examples);
-
-            System.out.println("\nResult:");
-            System.out.println("\tFitness: " + examples.get(0).getFitness());
-            System.out.println("\tPath: " + examples.get(0).getPath());
-            if (!examples.get(0).isValid()) {
-                System.out.println("\tERROR!");
-                System.out.println("\t" + examples.get(0).getErrorCode());
-            }
-            System.out.println();
         }
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);
