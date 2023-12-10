@@ -5,8 +5,13 @@ If we study the effects of how different number of birds change the solution of 
 The basic algorithm defines one iteration as the calculation for the cost of one tour. Now, let a phase of the algorithm denote each bird performing one move. So, in each phase each bird performs one move.
 If we now use more birds the number of phases the algorithm will run through will decrease, as in each phase the length of more tours will be calculated, which will use up more iterations. Therefore, the more birds we have, the more iterations we will use up per phase, which means the algorithm will run through less phases until it stops. 
 Because in one phase each bird can perform one move, less phases mean each bird can perform less moves. Less moves in turn leads to a less pronounced search of possible solutions, which will make the algorithm worse. This is why the less birds we have, the better the results will be.
+Examples can be seen in Figure ... (fig about relationship n birds x cost).
 
-Consequently, we aim to improve the bird behaviour, so that each bird needs fewer overall steps to achieve a good solution.
+One could avoid this by simply increasing the number of iterations, which balances the relationship between number of birds used and the results obtained. However, this inevitable leads to longer running times.
+
+Consequently, we focus on improving the bird behaviour, so that each bird needs fewer overall steps to achieve a good solution.
+(say something about the number of iterations used in experiments and how this relates to the facts described above)
+At the end of our analysis we will revisit this behaviour and conduct if our improvements changed the relationship discussed above (Chapter \ref{Effect of improvemens on number of birds}).
 
 \subsection{Swarm behaviour}
 Currently, if one big bird made the decision to join another bird, he picks one randomly.
@@ -17,20 +22,21 @@ We implement this by storing the indices $i$ of the birds in an ordered integer 
 
 The main disadvantage this approach has is that at we need to continuously update $ord$ so that we only join the actual top-b percent at the moment of the move. We decide to update the list after each bird has performed one move (after each phase), so that the sorting won't make up the majority of the running time.
 
-We test numerous values for $b$ and decide to build on $b=0.01$ for future improvement, as this strategy yields the best results (Table \ref{top_b_performance}). For intuitions on why such a low value performs this good, please refer to section "NOCH HINZUFÜGEN".
+We test numerous values for $b$ and decide to build on $b=0.01$ for future improvement, as this strategy yields the best results (Table \ref{top_b_performance}). For intuitions on why such a low value performs this good, please refer to section \ref{Algorithm Stability}.
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{ |p{2.5cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
+\begin{tabular}{ |p{1.5cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
  \hline
- Top-b& 0.25 & 0.20 & 0.15 & 0.05 & \textbf{0.01}\\
+ Top-b& 1 & 0.25 & 0.20 & 0.15 & 0.05 & \textbf{0.01}\\
+\hline \hline
+ PercentError & 215 &122 & 5.92 &  6.14 & 6.01 & \textbf{5.2}\\
  \hline
- Median Rel. Error & 55\% & 55\% &  55\% & 55\% & \textbf{55\%}\\
- \hline
- Median Runtime (in s) & 55 & 55 &  55 & 55 & \textbf{55\%}\\
+ Time (in s) & \textbf{7.6} & 8.6 & 8.7 &  8.1 & 8.3 & 8.1\\
  \hline
 \end{tabular}
-\caption{}
+\caption{Comparison of different parameters for our top-join. 1 means 100\%, so a bird randomly joins another bird. This is our benchmark and the
+default behaviour of the algorithm. Time is measured as the median runtime in seconds, over all 860 tests.}
 \label{top_b_performance}
 \end{table}
 
@@ -50,13 +56,13 @@ The results can be seen in Table \ref{3_opt_performance}.
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{ |p{3cm}||p{0.75cm}|p{0.75cm}|  }
+\begin{tabular}{ |p{2cm}||p{0.75cm}|p{0.75cm}|  }
  \hline
  Configuration& 2-opt & 3-opt\\
  \hline \hline
- Median Rel. Error & 55\% & \textbf{55\%}\\
+PercentError & 5.2 & \textbf{4.67}\\
  \hline
- Median Runtime (in sec) & \textbf{55} & 55\\
+ Time (in s) & \textbf{8.1} & 9.56\\
  \hline
 \end{tabular}
 \caption{}
@@ -72,13 +78,13 @@ Based on the results we decide to use 3-opt for big birds from, as this provides
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{ |p{3cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
+\begin{tabular}{ |p{2cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
  \hline
  Configuration& 2-opt & 3-opt & 3-opt small birds & 3-opt big birds\\
  \hline \hline
- Median Rel. Error & 55\% & 55\% & 55\% & \textbf{55\%}\\
+PercentError & 5.2 & 4.67 & 55\% & \textbf{55\%}\\
  \hline
- Median Runtime (in sec) & \textbf{55} & 55 & 55 & 55\\
+ Time (in s) & \textbf{8.1} & 9.56 & 55 & 55\\
  \hline
 \end{tabular}
 \caption{}
@@ -86,5 +92,3 @@ Based on the results we decide to use 3-opt for big birds from, as this provides
 \end{table}
 
 \subsection{Nearest-Neighbor Initialization}
-
-\subsection{Intuitions on Improvements}
