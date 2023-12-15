@@ -27,7 +27,7 @@ public class AFB_SOP extends AFB<int[]> {
                 0.4624556400235943, // 0.67,
                 0.33611898159023834, // 0.07,
                 0.6979749881176104, // 0.75,
-                4_000,
+                4_000_000,
                 sop,
                 rand);
 
@@ -147,6 +147,7 @@ public class AFB_SOP extends AFB<int[]> {
     void walk(int i) {
         // 2-opt local search
         Bird<int[]> bird = this.birds.get(i);
+        int[] newRoute;
         do {
             int delta = 0;
             int k = -1;
@@ -174,10 +175,10 @@ public class AFB_SOP extends AFB<int[]> {
                 k = l;
                 l = tmp;
             }
-            int[] newRoute = bird.position.clone();
+            newRoute = bird.position.clone();
             reverseInRange(newRoute, k, l);
-            bird.position = newRoute;
-        } while (!isValid(bird.position));
+        } while (!isValid(newRoute));
+        bird.position = newRoute;
     }
 
     // Reverses the order of the elements in the range [startInclusive,
