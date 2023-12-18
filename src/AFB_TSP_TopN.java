@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 // AFB for TSP with joining of top n birds.
 public class AFB_TSP_TopN extends AFB_TSP {
     private int joinTopN; // The number of best performing birds to join.
-    private int[] birdOrder;
+    protected int[] birdOrder;
     
     public AFB_TSP_TopN(
             int n_birds,
@@ -112,9 +112,9 @@ public class AFB_TSP_TopN extends AFB_TSP {
     protected Bird<int[]> randomBirdExcept(int excludedBirdIndex) {
         int j = excludedBirdIndex;
         while (j == excludedBirdIndex) {
-            j = this.rand.nextInt(this.joinTopN);
+            j = this.birdOrder[this.rand.nextInt(this.joinTopN)];
         }
-        return this.birds.get(this.birdOrder[j]);
+        return this.birds.get(j);
     }
 
     protected Bird<int[]> randomBirdAllExcept(int excludedBirdIndex) {

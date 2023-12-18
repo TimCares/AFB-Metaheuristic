@@ -18,7 +18,7 @@ public class StatsCreator {
         AFB<int[]> solver = null;
         AFBResultStats<int[]> res = null;
 
-        Set<String> files = TSPLoader.listFile("ali535.tsp");
+        Set<String> files = TSPLoader.listFile("eil101.tsp");
         Dataset dataset = null;
         double[][] tsp = null;
 
@@ -41,16 +41,16 @@ public class StatsCreator {
                 rand = new Random();
                 rand.setSeed(42);
 
-                solver = new AFB_TSP_Track(
+                solver = new AFB_TSP_TopN_Opt3_NFB_Track(
                         n_birds,
                         0.1589684022681154,//0.01,
                         0.4624556400235943, //0.67,
                         0.33611898159023834, //0.07,
                         0.6979749881176104, //0.75,
-                        5_000_000,
+                        200_000,
                         tsp,
                         rand
-                        //,0.25
+                        ,0.01
                 );
                 res = (AFBResultStats<int[]>) solver.solve();
                 cost.add(res.bestCost);

@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "TSP-AFB_5af1579f"
+        },
+        {
+            "type": "java",
             "name": "MetabirdsMain",
             "request": "launch",
             "mainClass": "MetabirdsMain",

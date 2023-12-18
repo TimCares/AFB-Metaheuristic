@@ -19,7 +19,7 @@ public class Main {
 
         StatsCreator statsCreator = new StatsCreator();
         if (statistics) {
-            statsCreator.collectStatistics();
+            statsCreator.costPerNBirds();
             return;
         }
 
@@ -31,7 +31,7 @@ public class Main {
         }
         Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
-        int n_trails_per_problem = 10;
+        int n_trails_per_problem = 1;
 
         int size = files.size() * n_trails_per_problem;
 
@@ -44,6 +44,7 @@ public class Main {
         AFBResult<int[]> res = null;
 
         Random rand = new Random();
+        rand.setSeed(42);
 
         for (int k=0; k< n_trails_per_problem; k++) {
             for (String filePath : files) {
@@ -53,7 +54,7 @@ public class Main {
                 double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
                 Fitness fitness = new Fitness(dataset);
 
-                AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NFB(
+                AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NN(
                     200,
                     0.1589684022681154,//0.01,
                     0.4624556400235943, //0.67,
