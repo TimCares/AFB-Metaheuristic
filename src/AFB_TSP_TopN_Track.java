@@ -1,11 +1,15 @@
+import result_src.AFBResult;
 import result_src.AFBResultStats;
-import java.util.ArrayList;
-import java.util.Random;
 
-// AFB for TSP with swap local search.
-public class AFB_TSP_Track extends AFB_TSP {
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Random;
+import java.util.stream.IntStream;
+
+// AFB for TSP with joining of top n birds.
+public class AFB_TSP_TopN_Track extends AFB_TSP_TopN {
     private ArrayList<Double> costOverTime;
-    public AFB_TSP_Track(
+    public AFB_TSP_TopN_Track(
             int n_birds,
             double probMoveRandom,
             double probMoveBest,
@@ -13,13 +17,14 @@ public class AFB_TSP_Track extends AFB_TSP {
             double smallBirdRatio,
             int max_iters,
             double[][] tsp,
-            Random rand
+            Random rand,
+            double joinTop
     ) {
-        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
+        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
         this.costOverTime = new ArrayList<>();
     }
 
-    public AFBResultStats<int[]> solve() {
+    public AFBResult<int[]> solve() {
         init();
         calcBestResult(); // Initialize birdOrder
         this.curr_iters = 0;
@@ -46,11 +51,9 @@ public class AFB_TSP_Track extends AFB_TSP {
                         break;
                     case FlyBest:
                         bird.position = clone(bird.bestPosition);
-                        bird.cost = bird.bestCost; // TODO: Can we update the ranking here?
+                        bird.cost = bird.bestCost;
                         break;
                     case FlyToOtherBird:
-                        // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
-
                         // Exclude i so the bird doesn't join itself
                         Bird<int[]> otherBird = randomBirdExcept(i);
                         bird.position = clone(otherBird.position);
@@ -63,6 +66,7 @@ public class AFB_TSP_Track extends AFB_TSP {
                     bird.bestCost = bird.cost;
                 }
             }
+            calcBestResult();
         }
         long time = (System.currentTimeMillis() - start);
 

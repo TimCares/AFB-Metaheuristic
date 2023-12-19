@@ -41,7 +41,7 @@ public class StatsCreator {
                 rand = new Random();
                 rand.setSeed(42);
 
-                solver = new AFB_TSP_TopN_Opt3_NFB_Track(
+                solver = new AFB_TSP_Track(
                         n_birds,
                         0.1589684022681154,//0.01,
                         0.4624556400235943, //0.67,
@@ -50,7 +50,7 @@ public class StatsCreator {
                         200_000,
                         tsp,
                         rand
-                        ,0.01
+                        //,0.01
                 );
                 res = (AFBResultStats<int[]>) solver.solve();
                 cost.add(res.bestCost);
@@ -82,26 +82,20 @@ public class StatsCreator {
         AFBResultStats<int[]> res = null;
         double times = 0;
 
-        Set<String> files = TSPLoader.listFile("dsj1000.tsp");
+        String file = TSPLoader.listFile("pr2392.tsp").iterator().next();
         Dataset dataset = null;
         double[][] tsp = null;
 
-        if (files.size() == 1) {
-            System.out.println("Running for one problem...");
-            dataset = Parser.read(files.iterator().next());
-            tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
-        }
+        dataset = Parser.read(file);
+        tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
 
-        for (String path: files) {
-            if (files.size() != 1) {
-                dataset = Parser.read(files.iterator().next());
-                tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
-            }
+        int n_trails_per_problem = 10;
+        Double[][] distances = new Double[n_trails_per_problem][4_000_000];
 
-            rand = new Random();
-            rand.setSeed(42);
+        rand = new Random();
+        for (int k=0; k< n_trails_per_problem; k++) {
 
-            solver = new AFB_TSP_Track(
+            solver = new AFB_TSP_TopN_Opt3_S_NN_ES_Track(
                     200,
                     0.1589684022681154,//0.01,
                     0.4624556400235943, //0.67,
@@ -110,15 +104,19 @@ public class StatsCreator {
                     4_000_000,
                     tsp,
                     rand
-                    //,0.25
+                    ,0.001
+                    ,0.5
             );
 
             res = (AFBResultStats<int[]>) solver.solve();
-            System.out.println("Cost for \"" + path + "\": " + res.bestCost);
+            System.out.println("Cost for \"" + "pr2392" + "\": " + res.bestCost);
             times += res.timeInMs;
-            to_csv(TSPLoader.getProblemName(path), res);
+            
+        
+            res.costOverTime.toArray(distances[k]);
         }
-        System.out.println("Avg. Time: " + times/files.size() + " ms");
+
+        to_csv(TSPLoader.getProblemName("tsp/pr2392.tsp"), computeColumnMeans(distances));
     }
 
     public void to_csv(String problem, AFBResultStats<int[]> results) {
@@ -126,6 +124,12 @@ public class StatsCreator {
 
         Double[] data = new Double[results.costOverTime.size()];
         writeLines(fileName, results.costOverTime.toArray(data));
+    }
+
+    public void to_csv(String problem, Double[] results) {
+        String fileName = "./data/experiments/" + problem + " " + getCurrTime() + ".csv";
+
+        writeLines(fileName, results);
     }
 
     public void writeLines(String fileName, Double[] data) {
@@ -143,5 +147,23 @@ public class StatsCreator {
         LocalDateTime timePoint = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy, hh:mm");
         return timePoint.format(formatter);
+    }
+
+    public Double[] computeColumnMeans(Double[][] array) {
+        int numRows = array.length;
+        int numCols = array[0].length;
+        Double[] means = new Double[numCols];
+
+        for (int col = 0; col < numCols; col++) {
+            double sum = 0;
+            for (int row = 0; row < numRows; row++) {
+                if (array[row][col] != null) {
+                    sum += array[row][col];
+                }
+            }
+            means[col] = sum / numRows;
+        }
+
+        return means;
     }
 }

@@ -4,10 +4,10 @@ import java.util.Random;
 import result_src.AFBResult;
 import result_src.AFBResultStats;
 
-// AFB for TSP with 3-opt local search for big birds, big birds can only walk.
-public class AFB_TSP_TopN_Opt3_NFB_Track extends AFB_TSP_TopN_Opt3_NFB {
+// AFB for TSP without locality estimation and 3-opt local search only for big birds.
+public class AFB_TSP_TopN_Opt3_S_Track extends AFB_TSP_TopN_Opt3_S {
     private ArrayList<Double> costOverTime;
-    public AFB_TSP_TopN_Opt3_NFB_Track(
+    public AFB_TSP_TopN_Opt3_S_Track(
             int n_birds,
             double probMoveRandom,
             double probMoveBest,
@@ -22,7 +22,6 @@ public class AFB_TSP_TopN_Opt3_NFB_Track extends AFB_TSP_TopN_Opt3_NFB {
         this.costOverTime = new ArrayList<>();
     }
 
-    @Override
     public AFBResult<int[]> solve() {
         init();
         calcBestResult(); // Initialize birdOrder
@@ -39,13 +38,13 @@ public class AFB_TSP_TopN_Opt3_NFB_Track extends AFB_TSP_TopN_Opt3_NFB {
                     case Walk:
                         walk(i);
                         cost(i);
-                        this.costOverTime.add(this.birds.get(calcBestResult()).bestCost);
+                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyRandom:
                         fly(i);
                         cost(i);
-                        this.costOverTime.add(this.birds.get(calcBestResult()).bestCost);
+                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyBest:
@@ -78,4 +77,17 @@ public class AFB_TSP_TopN_Opt3_NFB_Track extends AFB_TSP_TopN_Opt3_NFB {
         );
     }
 
+    protected int calcBestResultTrack() {
+        int bestBirdIndex = -1;
+        double bestCost = Double.MAX_VALUE;
+        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
+            Bird<int[]> bird = this.birds.get(birdIndex);
+            if (bird.bestCost < bestCost) {
+                bestCost = bird.bestCost;
+                bestBirdIndex = birdIndex;
+            }
+        }
+        assert bestBirdIndex != -1;
+        return bestBirdIndex;
+    }
 }

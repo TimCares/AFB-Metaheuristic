@@ -14,12 +14,12 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        boolean statistics = false;
+        boolean statistics = true;
         boolean all = true;
 
         StatsCreator statsCreator = new StatsCreator();
         if (statistics) {
-            statsCreator.costPerNBirds();
+            statsCreator.collectStatistics();
             return;
         }
 
@@ -31,7 +31,7 @@ public class Main {
         }
         Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
-        int n_trails_per_problem = 1;
+        int n_trails_per_problem = 10;
 
         int size = files.size() * n_trails_per_problem;
 
@@ -54,7 +54,7 @@ public class Main {
                 double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
                 Fitness fitness = new Fitness(dataset);
 
-                AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NN(
+                AFB<int[]> solver = new AFB_TSP_TopN_Opt3_S_NN_ES(
                     200,
                     0.1589684022681154,//0.01,
                     0.4624556400235943, //0.67,
@@ -63,7 +63,8 @@ public class Main {
                     4_000_000,
                     tsp,
                     rand
-                    ,0.01
+                    ,0.001,
+                    0.5
                 );
 
                 long start = System.currentTimeMillis();
@@ -97,6 +98,7 @@ public class Main {
                 }
                 System.out.println();
             }
+            System.out.println("------------------------------------------------Problems done: " + i + "------------------------------------------------");
         }
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);

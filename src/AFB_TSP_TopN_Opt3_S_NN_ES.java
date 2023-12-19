@@ -1,25 +1,31 @@
-import result_src.AFBResultStats;
-import java.util.ArrayList;
 import java.util.Random;
 
-// AFB for TSP with swap local search.
-public class AFB_TSP_Track extends AFB_TSP {
-    private ArrayList<Double> costOverTime;
-    public AFB_TSP_Track(
+import result_src.AFBResult;
+
+// AFB for TSP without locality estimation and 3-opt local search.
+public class AFB_TSP_TopN_Opt3_S_NN_ES extends AFB_TSP_TopN_Opt3_S_NN {
+    protected int patience;
+    protected int nPhasesNoImprovement;
+    protected double bestCost;
+    public AFB_TSP_TopN_Opt3_S_NN_ES(
             int n_birds,
             double probMoveRandom,
             double probMoveBest,
             double probMoveJoin,
-            double smallBirdRatio,
+            double smallBirdRatio,  
             int max_iters,
             double[][] tsp,
-            Random rand
+            Random rand,
+            double joinTop,
+            double patienceWeight
     ) {
-        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
-        this.costOverTime = new ArrayList<>();
+        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
+        this.patience = (int) (patienceWeight*max_iters/n_birds);
+        this.nPhasesNoImprovement = 0;
     }
 
-    public AFBResultStats<int[]> solve() {
+    @Override
+    public AFBResult<int[]> solve() {
         init();
         calcBestResult(); // Initialize birdOrder
         this.curr_iters = 0;
@@ -35,22 +41,18 @@ public class AFB_TSP_Track extends AFB_TSP {
                     case Walk:
                         walk(i);
                         cost(i);
-                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyRandom:
                         fly(i);
                         cost(i);
-                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyBest:
                         bird.position = clone(bird.bestPosition);
-                        bird.cost = bird.bestCost; // TODO: Can we update the ranking here?
+                        bird.cost = bird.bestCost;
                         break;
                     case FlyToOtherBird:
-                        // TODO: Improvement idea: Don't join any bird somehow prefer successful birds.
-
                         // Exclude i so the bird doesn't join itself
                         Bird<int[]> otherBird = randomBirdExcept(i);
                         bird.position = clone(otherBird.position);
@@ -63,29 +65,24 @@ public class AFB_TSP_Track extends AFB_TSP {
                     bird.bestCost = bird.cost;
                 }
             }
+            calcBestResult();
+            double currBestCost = this.birds.get(this.birdOrder[0]).bestCost;
+            if (currBestCost < this.bestCost) {
+                this.nPhasesNoImprovement = 0;
+                this.bestCost = currBestCost;
+            } else {
+                this.nPhasesNoImprovement++;
+            }
+            if (this.patience == this.nPhasesNoImprovement) break;
         }
         long time = (System.currentTimeMillis() - start);
 
         int bestBirdIndex =  calcBestResult();
-        return new AFBResultStats<>(
+        return new AFBResult<int[]>(
                 this.birds.get(bestBirdIndex).bestPosition,
                 this.birds.get(bestBirdIndex).bestCost,
-                time,
-                this.costOverTime
+                time
         );
     }
 
-    protected int calcBestResultTrack() {
-        int bestBirdIndex = -1;
-        double bestCost = Double.MAX_VALUE;
-        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
-            Bird<int[]> bird = this.birds.get(birdIndex);
-            if (bird.bestCost < bestCost) {
-                bestCost = bird.bestCost;
-                bestBirdIndex = birdIndex;
-            }
-        }
-        assert bestBirdIndex != -1;
-        return bestBirdIndex;
-    }
 }

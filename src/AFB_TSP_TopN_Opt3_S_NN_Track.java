@@ -1,13 +1,15 @@
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import result_src.AFBResult;
+import result_src.AFBResultStats;
 
-// AFB for TSP without locality estimation and 3-opt local search.
-public class AFB_TSP_TopN_Opt3_NN_ES extends AFB_TSP_TopN_Opt3_NN {
-    private int patience;
-    private int nPhasesNoImprovement;
-    private double bestCost;
-    public AFB_TSP_TopN_Opt3_NN_ES(
+// AFB for TSP without locality estimation and 3-opt local search only for big birds.
+public class AFB_TSP_TopN_Opt3_S_NN_Track extends AFB_TSP_TopN_Opt3_S_NN {
+    private ArrayList<Double> costOverTime;
+    public AFB_TSP_TopN_Opt3_S_NN_Track(
             int n_birds,
             double probMoveRandom,
             double probMoveBest,
@@ -16,15 +18,12 @@ public class AFB_TSP_TopN_Opt3_NN_ES extends AFB_TSP_TopN_Opt3_NN {
             int max_iters,
             double[][] tsp,
             Random rand,
-            double joinTop,
-            double patienceWeight
+            double joinTop
     ) {
         super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
-        this.patience = (int) (patienceWeight*max_iters/n_birds);
-        this.nPhasesNoImprovement = 0;
+        this.costOverTime = new ArrayList<>();
     }
 
-    @Override
     public AFBResult<int[]> solve() {
         init();
         calcBestResult(); // Initialize birdOrder
@@ -41,11 +40,13 @@ public class AFB_TSP_TopN_Opt3_NN_ES extends AFB_TSP_TopN_Opt3_NN {
                     case Walk:
                         walk(i);
                         cost(i);
+                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyRandom:
                         fly(i);
                         cost(i);
+                        this.costOverTime.add(this.birds.get(calcBestResultTrack()).bestCost);
                         this.curr_iters++;
                         break;
                     case FlyBest:
@@ -66,23 +67,29 @@ public class AFB_TSP_TopN_Opt3_NN_ES extends AFB_TSP_TopN_Opt3_NN {
                 }
             }
             calcBestResult();
-            double currBestCost = this.birds.get(this.birdOrder[0]).bestCost;
-            if (currBestCost < this.bestCost) {
-                this.nPhasesNoImprovement = 0;
-                this.bestCost = currBestCost;
-            } else {
-                this.nPhasesNoImprovement++;
-            }
-            if (this.patience == this.nPhasesNoImprovement) break;
         }
         long time = (System.currentTimeMillis() - start);
 
         int bestBirdIndex =  calcBestResult();
-        return new AFBResult<int[]>(
+        return new AFBResultStats<>(
                 this.birds.get(bestBirdIndex).bestPosition,
                 this.birds.get(bestBirdIndex).bestCost,
-                time
+                time,
+                this.costOverTime
         );
     }
 
+    protected int calcBestResultTrack() {
+        int bestBirdIndex = -1;
+        double bestCost = Double.MAX_VALUE;
+        for (int birdIndex=0; birdIndex < this.n_birds; birdIndex++) {
+            Bird<int[]> bird = this.birds.get(birdIndex);
+            if (bird.bestCost < bestCost) {
+                bestCost = bird.bestCost;
+                bestBirdIndex = birdIndex;
+            }
+        }
+        assert bestBirdIndex != -1;
+        return bestBirdIndex;
+    }
 }

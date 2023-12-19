@@ -20,7 +20,7 @@ public class AFB_TSP_TopN extends AFB_TSP {
             double joinTop
     ) {
         super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
-        this.joinTopN = (int) (joinTop*this.n_birds);
+        this.joinTopN = (int) Math.ceil(joinTop*this.n_birds);
     }
 
     public AFBResult<int[]> solve() {
@@ -113,6 +113,7 @@ public class AFB_TSP_TopN extends AFB_TSP {
         int j = excludedBirdIndex;
         while (j == excludedBirdIndex) {
             j = this.birdOrder[this.rand.nextInt(this.joinTopN)];
+            if (this.joinTopN == 1 && j==excludedBirdIndex) return this.birds.get(excludedBirdIndex);
         }
         return this.birds.get(j);
     }
