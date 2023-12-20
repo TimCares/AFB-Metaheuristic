@@ -1,6 +1,7 @@
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,6 +51,10 @@ public class AFB_SOP extends AFB<int[]> {
     protected int n_cities;
     protected double[][] sop;
 
+    private Set<Integer> dependencyFreeCities = new HashSet<Integer>();
+    // A map from city index to the number of dependencies that city has.
+    private int[] dependencyCounts;
+
     public AFB_SOP(
             int n_birds,
             double probMoveRandom,
@@ -64,6 +69,23 @@ public class AFB_SOP extends AFB<int[]> {
         this.n_cities = sop.length;
         Logger.log("Processing SOP with length " + this.n_cities);
         this.sop = sop;
+
+        // Find all cities that have no dependencies and initialize the dependency
+        // counts.
+        this.dependencyCounts = new int[this.n_cities];
+        for (int i = 0; i < this.n_cities; i++) {
+            this.dependencyCounts[i] = 0;
+            boolean hasDependencies = false;
+            for (int j = 0; j < this.n_cities; j++) {
+                if (this.sop[i][j] == -1) {
+                    this.dependencyCounts[i]++;
+                    hasDependencies = true;
+                }
+            }
+            if (!hasDependencies) {
+                this.dependencyFreeCities.add(i);
+            }
+        }
     }
 
     @Override
@@ -96,6 +118,17 @@ public class AFB_SOP extends AFB<int[]> {
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
         Logger.log("[DEBUG]: Initialization done.");
+    }
+
+    // Returns a set of cities that must be visited before cityIndex.
+    Set<Integer> getDependents(int cityIndex) {
+        Set<Integer> dependents = new HashSet<Integer>();
+        for (int i = 0; i < this.n_cities; i++) {
+            if (this.sop[i][cityIndex] == -1) { // TODO: Is this the right way around
+                dependents.add(i);
+            }
+        }
+        return dependents;
     }
 
     // Check if route is valid.
@@ -134,13 +167,43 @@ public class AFB_SOP extends AFB<int[]> {
 
     @Override
     void fly(int birdIndex) {
-        Bird<int[]> bird = this.birds.get(birdIndex);
-        do {
-            ArrayList<Integer> boxedRoute = Arrays.stream(bird.position).boxed()
-                    .collect(Collectors.toCollection(ArrayList::new));
-            Collections.shuffle(boxedRoute);
-            bird.position = boxedRoute.stream().mapToInt(i -> i).toArray();
-        } while (!isValid(bird.position));
+        // The set of cities that have all their dependencies met.
+        Set<Integer> available = new HashSet<>(this.dependencyFreeCities);
+        assert available != this.dependencyFreeCities;
+
+        int[] dependencyCounts = this.dependencyCounts.clone();
+
+        ArrayList<Integer> route = new ArrayList<Integer>(this.n_cities);
+
+        while (!available.isEmpty()) {
+            // Pick a random city from the available set.
+            int city = (int) available.toArray()[this.rand.nextInt(available.size())];
+            route.add(city);
+            available.remove(city);
+
+            // Update the dependency counts.
+            for (Integer dependent : getDependents(city)) {
+                dependencyCounts[dependent]--;
+                if (dependencyCounts[dependent] == 0) {
+                    available.add(dependent);
+                }
+            }
+        }
+
+        assert route.size() == this.n_cities;
+
+        this.birds.get(birdIndex).position = route.stream().mapToInt(i -> i).toArray();
+
+        /*
+         * Naive fly
+         * Bird<int[]> bird = this.birds.get(birdIndex);
+         * do {
+         * ArrayList<Integer> boxedRoute = Arrays.stream(bird.position).boxed()
+         * .collect(Collectors.toCollection(ArrayList::new));
+         * Collections.shuffle(boxedRoute);
+         * bird.position = boxedRoute.stream().mapToInt(i -> i).toArray();
+         * } while (!isValid(bird.position));
+         */
     }
 
     @Override
