@@ -54,18 +54,62 @@ public class Main {
                 double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
                 Fitness fitness = new Fitness(dataset);
 
-                AFB<int[]> solver = new AFB_TSP_TopN_Opt3_S_NN_ES(
-                    200,
-                    0.1589684022681154,//0.01,
-                    0.4624556400235943, //0.67,
-                    0.33611898159023834, //0.07,
-                    0.6979749881176104, //0.75,
-                    4_000_000,
-                    tsp,
-                    rand
-                    ,0.001,
-                    0.5
-                );
+
+                AFB<int[]> solver = null;
+                if (tsp.length <= 101) {
+                  // 0 - 101 cities
+                  // Optimized for eil101.tsp
+                  solver = new AFB_TSP_TopN_Opt3_S_NN(
+                          619,
+                          0.2235857343494696,
+                          0.5745181637759841,
+                          0.1379234632372206,
+                          0.6028477073869289,
+                          30_000_000,
+                          tsp,
+                          rand,
+                          0.5095838567445682);
+                } else if (tsp.length <= 493) {
+                  // 102 - 493 cities
+                  // Optimized for d493.tsp
+                  solver = new AFB_TSP_TopN_Opt3_S_NN(
+                          817,
+                          0.050676743875328945,
+                          0.5735153978684355,
+                          0.25699240705138704,
+                          0.08721972062950567,
+                          20_000_000,
+                          tsp,
+                          rand,
+                          0.24050371005872195);
+                } else if (tsp.length <= 1000) {
+                  // 494 - 1000
+                  // Optimized for dsj1000.tsp
+                  solver = new AFB_TSP_TopN_Opt3_S_NN(
+                          386,
+                          0.19409974797046914,
+                          0.2073344109915185,
+                          0.4623957982487684,
+                          0.19421454763215162,
+                          5_000_000,
+                          tsp,
+                          rand,
+                          0.14837291455539625);
+                } else {
+                  // 1001+
+                  // Optimized for fnl4461.tsp
+                  solver = new AFB_TSP_TopN_Opt3_S_NN(
+                          10,
+                          0.3314722966118387,
+                          0.0802001772255807,
+                          0.421615891136749,
+                          0.18933803292002926,
+                          500_000,
+                          tsp,
+                          rand,
+                          0.421615891136749 // topJoin is exactly identical to probMoveJoin. Very weird.
+                        );
+                }
 
                 long start = System.currentTimeMillis();
                 res = solver.solve();
