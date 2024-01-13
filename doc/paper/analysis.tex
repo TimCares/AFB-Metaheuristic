@@ -1,36 +1,70 @@
 \section{Analysis}
 \subsection{Metabirds}
-\subsection{Algorithm Stability} \label{Algorithm Stability}
+\subsection{Intuitions on our Improvements} \label{Intuitions on our Improvements}
 Swarm algorithm usually include action of agents which can either be classified as exploitation or exploration.
 Exploitation means an agent uses its current result and tries to improve it, i.e. the agent continues to go into the direction he previously went in the search tree/space.
-For AFB this is can be achieved using the walk move, so a local search.
-Exploration means an agent tries to find a better solution in the search space that is not necessarily dependent on its current solution, as is the case with exploitation. Therefore, it can be seen as a global search. For AFB, this can be achieved using the fly move.
+For AFB, this is can be achieved using the walk move, so a local search.
+
+Exploration means an agent tries to find a better solution not necessarily dependent on its current solution,
+as is the case with exploitation. Therefore, it can be seen as a global search. For AFB, this can be achieved using the fly move.
 
 
-For a swarm algorithm to deliver a solution which is as close as possible to the global minimum it needs a good balance between exploitation and exploration: It needs to be able to improve a good solution and search for different solutions if the current one does not seem promising.
+For a swarm algorithm to deliver a good approximation with respect to the global minimum
+it needs a good balance between exploitation and exploration:
+It needs to be able to improve a good solution,
+and search for different solutions if the current one does not seem promising.
 
 If exploitation is too dominant, then the algorithm might get stuck in a local minimum, as other solutions (for TSP other, vastly different tours) will not be explored enough, and vice versa.
 
+As might have come apparent in the sections prior, the main focus of this paper
+was on exploitation (improving a good solution).
+This is mainly done by the introduction of 3-opt and that big birds can only join successful birds.
+Even though the latter cannot be seen directly as a local search, is does lead to more (big) birds performing exploitation of the solutions of other birds.
 
-Because in AFB the balance is mostly specified by the probability of moves walk and fly, and the authors already tuned the algorithm to probabilities that work well in practice, we did not focus on changing this balance.
-Instead, our focus was mainly on exploitation: Improving a good solution, which is mainly done by the introduction of 3-opt and that big birds can only join successful birds. Even though the latter cannot be seen directly as a local search, is does lead to more (big) birds performing exploitation of the solutions of other birds.
+We explicitly do not modify the fly move, i.e. selecting a random tour, as this provides us with a rich selection of other possible solution, which at the same time is completely independent of the current solution (of an agent).
 
+The prior is crucial for the success of our algorithm, because the extreme join
+behavior modeled by the algorithm has a high danger of getting it stuck in a
+local minimum: Starting with our improvements on the swarm behavior,
+a big bird will only be able to join the best bird. Because which bird is the best
+is not updated within a phase, it could be that during one phase a lot of big birds join the same bird,
+putting a lot (not all, as a join is a matter of probability) of agents at one place in the search space.
+The fly move enables birds to escape this single solution if it does not seem promising.
 
-We explicitly do not modify the fly-move, selecting a random tour, as this provides us with a rich selection of other possible solution, which at the same time is completely independent of the current solution (of an agent).
+Furthermore, there is only a limited number of big birds, meaning small birds are able
+to explore the search space elsewhere, while the big birds are focusing on the currently best performing bird.
 
-The prior is crucial for the success of our algorithm, because the extreme join-behaviour modeled by the algorithm has a high danger of getting stuck in a local minimum: For our experiments we used just 200 birds, a top-b join of 0.01 therefore means big birds will only join the 2 birds with the best current tour.
-
-Therefore, we get an algorithm that has an empirically tested balance between exploitation and exploration. It exploits good solutions in a harsh manner while also being able to switch to completely new solutions if they prove to be better.
-This process will be repeated until a solution is reached that will be close to the optimum (the algorithm converges).
+Therefore, we get an algorithm that has an empirically tested balance between exploitation and exploration.
+It exploits good solutions in a harsh manner while also being able to switch to completely new solutions if they prove to be better.
+This process will be repeated until a solution is reached that will either be close to the optimum, or a local minimum.
+Either way, the algorithm converges.
 
 \subsection{Exploitators and Explorators}
-The base algorithm consists of two types of agents, small and big birds. With our improvements it may have been noticeable that we separated the roles of both agent types more and more from each other: While small birds can perform the usual 2-opt local search when they are walking, big birds can perform a more powerful 3-opt walk; while small birds will be able to fly, big birds can only perform a walk; also, big birds can join other birds.
-We do this in order to make the components contained in each swarm algorithm, exploration and exploitation, an explicit part of the algorithm by delegating small birds to the role of explorators, and big birds to the role of exploitators:
+The base algorithm consists of two types of agents, small and big birds.
+With our improvements it may have been noticeable that we separated the roles
+of both agent types more and more from each other:
+While small birds can perform the usual 2-opt local search when they are walking,
+big birds can perform a more powerful 3-opt walk;
+big birds can join other birds.
+We do this in order to make the components contained in each swarm algorithm,
+exploration and exploitation, a more explicit part of the algorithm:
+We delegate small birds to the role of explorators, and big birds to the role of exploitators.
 
-Small birds are able to access vastly different areas of the search space for possible better solutions than their current one, using the fly-move, big birds are able to profit from those that have found the best current solution by joining them and improving that solution using 3-opt (walk).
+Small birds are able to access vastly different areas of the search space for possible better
+solutions than their current one. Using the fly-move, big birds are able to profit
+from those birds that have found the best current solution by joining them and
+improving that solution using 3-opt (walk).
 
 
-The circumstance that small birds can also perform exploitation using their own version of the walk-move is owed to the fact that they otherwise would just jump between random solutions, which wouldn’t be a good foundation for the join behaviour of big birds (see Table \ref{small_birds_only_fly}), which is very essential for the performance of our algorithm. Also, since big birds can also join other big birds and the solutions for small birds would be rather poor, the probability that big birds will exclusively join other big birds would be very high, making small birds essentially useless. Apart from that, the risk that the algorithm will converge to a local minimum is also increased, as a strong exploration of the search space, through a shuffling of the tour by the fly-move of small birds, is heavily decreased.
+The circumstance that small birds can also perform exploitation, using their own version of the walk move,
+is owed to the fact that they otherwise would only be able to perform
+the fly move, i.e. jumping between random solutions.
+This wouldn’t be a good foundation for the join behavior of big birds (see Table \ref{small_birds_only_fly}),
+which is very essential for the performance of our algorithm.
+Also, since big birds can also join other big birds,
+and the solutions for small birds would be rather poor, the probability that
+big birds will exclusively join other big birds would be very high,
+making small birds essentially useless.
 
 \begin{table}[h!]
 \centering

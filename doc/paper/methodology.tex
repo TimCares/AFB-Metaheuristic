@@ -1,8 +1,15 @@
 \section{Methodology}
-We structure our experiments in an incremental manner. Each improvement in section \ref{Improvements} builds on the previous adjustments, even if it is not explicitly noted. We verify our improvements using a set of selected TSP problems from TSPLIB. For our selection we exclude all problems of type GEO and those that do not cause problems with the available RAM. Consequently, we test on 86 TSP problems ranging from 16 to 5934 nodes.
+We structure our experiments in an incremental manner.
+Each improvement in section \ref{Improvements} builds on the previous adjustments,
+even if it is not explicitly noted.
+We verify our improvements using a set of selected TSP problems from TSPLIB, namely
+eil101, pa561, pr1002, u2156 and pr2392, ranging from 101 to 2392 cities.
 
-
-For each experiment we run the 86 problems 10 times each to account for the randomness at initialization. In order to then compare the performance of different experiments we record the Median Percentage Error of the 860 test with respect to the optimal solutions. We also record the Median Runtime (over all tests) in seconds.
+For each experiment, we run the problems 10 times each to account for the randomness
+at initialization, to reduce noise, and make it statistically significant.
+In order to then compare the performance of different experiments
+we record the \textit{Mean Percentage Error}, over the 50 tests, with respect to the optimal solutions.
+We also record the \textit{Mean Runtime} in seconds.
 
 \begin{equation}
 Percent Error= \frac{\lvert measured - optimal\rvert}{optimal}*100
