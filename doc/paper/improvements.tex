@@ -4,14 +4,18 @@ If we study the effects of how different number of birds change the solution of 
 
 The basic algorithm defines one iteration as the calculation for the cost of one tour. Now, let a phase of the algorithm denote each bird performing one move. So, in each phase each bird performs one move.
 If we now use more birds the number of phases the algorithm will run through will decrease, as in each phase the length of more tours will be calculated, which will use up more iterations. Therefore, the more birds we have, the more iterations we will use up per phase, which means the algorithm will run through less phases until it stops. 
-Because in one phase each bird can perform one move, less phases mean each bird can perform less moves. Less moves in turn leads to a less pronounced search of possible solutions, which will make the algorithm worse. This is why the less birds we have, the better the results will be.
+Because in one phase each bird can perform one move, fewer phases mean each bird can perform fewer moves. 
+Less moves in turn leads to a less pronounced search of possible solutions,
+which will make the algorithm worse.
+This is why the fewer birds we have, the better the results will be.
 Examples can be seen in Figure ... (fig about relationship n birds x cost).
 
-One could avoid this by simply increasing the number of iterations, which balances the relationship between number of birds used and the results obtained. However, this inevitable leads to longer running times.
+One could avoid this by simply increasing the number of iterations,
+which balances the relationship between number of birds used and the results obtained.
+However, this inevitable leads to longer running times.
 
-Consequently, we focus on improving the bird behavior, so that each bird needs fewer overall steps to achieve a good solution.
-(say something about the number of iterations used in experiments and how this relates to the facts described above)
-At the end of our analysis we will revisit this behavior and conduct if our improvements changed the relationship discussed above (Chapter \ref{Effect of improvemens on number of birds}).
+Consequently, we focus on improving the bird behavior,
+so that each bird needs fewer overall steps to achieve a good solution.
 
 \subsection{Swarm Behavior} \label{Swarm Behavior}
 Currently, if one big bird made the decision to join another bird, he picks one randomly.
