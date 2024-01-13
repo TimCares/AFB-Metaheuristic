@@ -9,42 +9,48 @@ Examples can be seen in Figure ... (fig about relationship n birds x cost).
 
 One could avoid this by simply increasing the number of iterations, which balances the relationship between number of birds used and the results obtained. However, this inevitable leads to longer running times.
 
-Consequently, we focus on improving the bird behaviour, so that each bird needs fewer overall steps to achieve a good solution.
+Consequently, we focus on improving the bird behavior, so that each bird needs fewer overall steps to achieve a good solution.
 (say something about the number of iterations used in experiments and how this relates to the facts described above)
-At the end of our analysis we will revisit this behaviour and conduct if our improvements changed the relationship discussed above (Chapter \ref{Effect of improvemens on number of birds}).
+At the end of our analysis we will revisit this behavior and conduct if our improvements changed the relationship discussed above (Chapter \ref{Effect of improvemens on number of birds}).
 
-\subsection{Swarm behaviour}
+\subsection{Swarm Behavior} \label{Swarm Behavior}
 Currently, if one big bird made the decision to join another bird, he picks one randomly.
 This means joining any bird without considering how good the position of that bird might be. This contradicts the original idea of the authors that big birds tend to join others that have found a good food source (current solution seems promising) \cite{afb}.
 Therefore, we propose that a big will only be able to join the top-b percent of birds that have the lowest current cost. If one chooses the right ratio, we assume that it will automatically nudge the swarm in the direction of the global minimum.
 
 We implement this by storing the indices $i$ of the birds in an ordered integer array $ord$ and introducing a new hyperparameter $b$, denoting which of the top-b percent to join. When we select the bird to join to, we draw a random uniform number $j$ between 1 and $b*n$ ($n$ denotes the number of birds) and get the index of the bird to join from the ordered array ($ord[j]$).
 
-The main disadvantage this approach has is that at we need to continuously update $ord$ so that we only join the actual top-b percent at the moment of the move. We decide to update the list after each bird has performed one move (after each phase), so that the sorting won't make up the majority of the running time.
+The main disadvantage this approach has is that at we need to continuously update $ord$ so that we only join the actual top-b percent at the moment of the move.
+We decide to update the list after each bird has performed one move (after each phase).
+This will still increase the computational complexity, but we think that this is better than updating the list after each move, as this would be too costly.
 
 We test numerous values for $b$ and decide to build on $b=0.01$ for future improvement, as this strategy yields the best results (Table \ref{top_b_performance}). For intuitions on why such a low value performs this good, please refer to section \ref{Algorithm Stability}.
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{ |p{1.5cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
+\begin{tabular}{ |p{1.5cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
  \hline
- Top-b& 1 & 0.25 & 0.20 & 0.15 & 0.05 & \textbf{0.01}\\
+ Top-b& 1 & 0.25 & 0.20 & 0.15 & 0.05 & 0.01&\textbf{only best}\\
 \hline \hline
- PercentError & 215 &122 & 5.92 &  6.14 & 6.01 & \textbf{5.2}\\
+ PercentError & 497 &323 & 279 &  246 & 150 & 79 &\textbf{69}\\
  \hline
- Time (in s) & \textbf{7.6} & 8.6 & 8.7 &  8.1 & 8.3 & 8.1\\
+ Time (in s) & \textbf{19.7} & 21.8 & 21.3 &  21.3 & 21.7 & 21.4 & 20.8\\
  \hline
 \end{tabular}
 \caption{Comparison of different parameters for our top-join. 1 means 100\%, so a bird randomly joins another bird. This is our benchmark and the
-default behaviour of the algorithm. Time is measured as the median runtime in seconds, over all 860 tests.}
+default behavior of the algorithm. Time is measured as the median runtime in seconds, over all tests.}
 \label{top_b_performance}
 \end{table}
 
 \subsection{3-opt Walk}
 
-For the walk move the algorithm uses a modified version of the 2-opt heuristic as a local search. Instead of using 2-opt, we test a 3-opt variant, as this often yields the best solutions under consideration of computational complexity \cite{lin}. At the same time we decide to remove the estimation of local similarity from the algorithm, as the authors did not provide any intuitions why this may be beneficial \cite{afb}.
+For the walk move the algorithm uses a modified version of the 2-opt heuristic as a local search \cite{afb}. Instead of using 2-opt, we test a 3-opt variant, as this often yields the best solutions under consideration of computational complexity \cite{lin}. At the same time we decide to remove the estimation of local similarity from the algorithm, as the authors did not provide any intuitions why this may be beneficial \cite{afb}.
 
-With 3-opt, each bird selects the tour with the lowest cost out of the 7 different tours possible. At which 3 points a tour is opened is determined by a random uniform draw of 3 integers, denoting the indices of the tour. Because we need to calculate the length of each of the possible 7 tours, and this happens in just one move of one bird, this move still only costs one iteration.
+With 3-opt, each bird selects the tour with the lowest cost out of the 7 different tours possible.
+At which 3 points a tour is opened is determined by a random uniform draw of 3 integers,
+denoting the nodes of the tour. Because we now need to calculate the length of each of the possible 7 tours
+in just one move, we decide it will still only cost us one iteration.
+The results can be seen in Table \ref{3_opt_performance}.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=8cm]{3_opt}}
@@ -52,17 +58,15 @@ With 3-opt, each bird selects the tour with the lowest cost out of the 7 differe
 \label{3_opt}
 \end{figure}
 
-The results can be seen in Table \ref{3_opt_performance}.
-
 \begin{table}[h!]
 \centering
 \begin{tabular}{ |p{2cm}||p{0.75cm}|p{0.75cm}|  }
  \hline
- Configuration& 2-opt & 3-opt\\
+ Configuration& 2-opt & \textbf{3-opt}\\
  \hline \hline
-PercentError & 5.2 & \textbf{4.67}\\
+PercentError & 69 & \textbf{44}\\
  \hline
- Time (in s) & \textbf{8.1} & 37.2\\
+ Time (in s) & \textbf{21} & 85\\
  \hline
 \end{tabular}
 \caption{}
@@ -71,20 +75,34 @@ PercentError & 5.2 & \textbf{4.67}\\
 
 \subsection{Delegating Responsibility}
 
-Because we are not implementing the 3-opt algorithms by itself, but rather in a swarm algorithm, in which each bird (or agent respectively) can perform this action, the computational complexity will rise by a margin, as seen in Table \ref{3_opt_performance}. This is why we test the case where only big birds are able to perform a 3-opt walk, while smaller birds are only capable of the usual 2-opt walk as specified in the paper. This should not only reduce the computational complexity but also pairs well with the assumption that big birds are superior, as only they can join other birds and therefore profit from them.
+Because we are not implementing the 3-opt algorithm as an iterative solver by itself,
+but rather in a swarm algorithm, in which each bird (or agent respectively) can perform this action,
+the computational complexity will rise by a margin, as seen in Table \ref{3_opt_performance}.
+In order to now compensate for this increase in complexity, we decide to test if we can delegate
+the responsibility of performing 3-opt to only a subset of the birds. This sounds promising, as
+we can reduce the computational complexity while still being able to profit from the increased exploration of 3-opt.
 
-Furthermore, we also test the inverse approach: Only small birds can perform 3-opt.
-Based on the results we decide to use 3-opt for big birds from, as this provides the best average improvement in performance with a reasonable increase in computation time.
+We test the case where only big birds are able to perform a 3-opt walk, while smaller birds
+are only capable of the usual 2-opt walk as specified in the paper. 
+This should not only reduce the computational complexity, but it also pairs well with the 
+assumption that big birds are "superior", as only they can join other birds and therefore profit from them.
+
+For the sake of completeness we also test the inverse approach: Only small birds can perform 3-opt.
+Surprisingly, for big birds we observed that we can achieve the same performance as before, while
+cutting runtime by half (Table \ref{3_opt_big_small_performance}). Interestingly, for small birds
+we noticed an increased error rate, even though the small bird ratio is always $r > 0.5$ in our experiments.
+Based on the results, we decided to use 3-opt only for big birds in our future experiments, as there
+seems to be no downside to this approach.
 
 \begin{table}[h!]
 \centering
 \begin{tabular}{ |p{2cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
  \hline
- Configuration& 2-opt & 3-opt & 3-opt small birds & 3-opt big birds\\
+ Configuration& 2-opt & 3-opt & \textbf{3-opt big birds} & 3-opt small birds\\
  \hline \hline
-PercentError & 5.2 & \textbf{4.67} & 29.1\% & 12.96\%\\
+PercentError & 69 & \textbf{44} & \textbf{44} & 85\\
  \hline
- Time (in s) & \textbf{8.1} & 37.2 & 30.7 & 18.1\\
+ Time (in s) & \textbf{21} & 85 & 40 & 69\\
  \hline
 \end{tabular}
 \caption{}
@@ -92,3 +110,37 @@ PercentError & 5.2 & \textbf{4.67} & 29.1\% & 12.96\%\\
 \end{table}
 
 \subsection{Nearest-Neighbor Initialization}
+\subsection{Early Stopping}
+If we analyze the convergence behavior by plotting the cost of the best solution over the number of iterations
+(Figure TODO),
+we notice that our improved version of the algorithm converges much faster than the original algorithm,
+even without a Nearest-Neighbor initialization. Because it is difficult to estimate how many iterations
+are needed for a certain problem, and adapting the number of iterations to the problem at hand would
+be cumbersome, we decide to implement an early stopping mechanism.
+That way we do not waste computational resources on iterations that do not improve an existing solution,
+which will reduce the runtime even further, especially for smaller TSP configurations, while retaining
+a similar performance.
+
+We implement this by introducing a new hyperparameter $p$, denoting the number of phases
+without an improvement of the best current solution. If it is exceeded, the algorithm will stop.
+This requires us to store the best solution over all birds and updating it continuously.
+Fittingly, this is already implemented through the top-b join (see section \ref{Swarm Behavior}),
+as we already need to store the best solution over all birds in order to determine which bird
+to join to. This is also the reason why we only check if the best solution has improved after each phase,
+and not after each iteration, as during a phase this solution is not updated.
+A review during a phase therefore does not make sense.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ |p{2cm}||p{1.5cm}|p{0.75cm}|  }
+    \hline
+    Early Stopping& No (default) & Yes \\
+    \hline \hline
+    PercentError & \textbf{8} & 10\\
+    \hline
+    Time (in s) & 42 & 9\\
+    \hline
+\end{tabular}
+\caption{}
+\label{early_stopping_performance}
+\end{table}

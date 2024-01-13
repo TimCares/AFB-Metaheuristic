@@ -3,3 +3,11 @@
 *.log
 *.synctex.gz
 experiments/
+
+~$*.pptx
+*.fls
+*.fdb_latexmk
+*.iml
+.vscode/
+.idea/
+*.DS_Store
