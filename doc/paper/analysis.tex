@@ -60,21 +60,33 @@ The circumstance that small birds can also perform exploitation, using their own
 is owed to the fact that they otherwise would only be able to perform
 the fly move, i.e. jumping between random solutions.
 This wouldn’t be a good foundation for the join behavior of big birds (see Table \ref{small_birds_only_fly}),
-which is very essential for the performance of our algorithm.
+which is essential for the performance of our algorithm.
 Also, since big birds can also join other big birds,
 and the solutions for small birds would be rather poor, the probability that
 big birds will exclusively join other big birds would be very high,
 making small birds essentially useless.
 
+Exactly this can be verified by simply by comparing how 
+the algorithm performs when (1) small birds can only fly,
+(2) all small birds are removed from the algorithm, and only big birds are kept.
+
+Surprisingly, the results show us that configuration (2) performs even better
+than the variant (1), indicating that the big birds only
+join other big birds, and that small birds, whose only purpose is to perform the fly move,
+provide no value to the algorithm.
+
 \begin{table}[h!]
 \centering
-\begin{tabular}{ |p{2.5cm}||p{0.75cm}|p{0.75cm}|  }
+\begin{tabular}{ |p{1.5cm}||p{1.2cm}|p{1.2cm}|p{2cm}| }
  \hline
- Configuration& Regular & Only fly\\
+ Configuration& \textbf{Regular} & Only fly& No small birds\\
  \hline \hline
-PercentError & \textbf{18.28} & 18.28\\
+PercentError & \textbf{8} & 15 & 10\\
 \hline
 \end{tabular}
-\caption{If small birds are only able to fly, the algorithm performs worse than before. Notice however that it still achieves a reasonable performance over the 86 problems.}
+\caption{If small birds are only able to fly, the algorithm performs worse than before.
+Notice however that it still achieves a reasonable performance.
+For our experiments we continuously used 200 birds, 150 of them being small birds.
+So by removing all small birds for experiment (2), we are left with 50 (big) birds.}
 \label{small_birds_only_fly}
 \end{table}
