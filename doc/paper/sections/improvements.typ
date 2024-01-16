@@ -148,3 +148,61 @@ A review during a phase therefore does not make sense.
   ),
   caption: [], // TODO
 ) <early_stopping_performance>
+
+== Metabirds <Metabirds>
+
+Both the original algorithm and our extensions define various hyperparameters like the number of birds, the ratio of small birds, the top-b join percentage, the probabilities of the basic moves
+We have already discussed analytical approaches to choosing some of these values, but these tests were limited and did not capture the possible complex interplay between different hyperparameters.
+
+To remedy this, we chose to apply an optimization algorithm to the hyperparameters of the TSP solver.
+The choice of optimization algorithm was simple: we used the same AFB algorithm that the TSP solver itself uses.
+We call this algorithm _Metabirds_, as every bird in the hyperparameter optimizer contains itself a swarm of birds solving the TSP.
+
+To be more precise, every metabird represents a position in the hyperparameter space made up of values for the number of birds, the ratio of small birds, the top-b join percentage and the various move probabilities.
+For the walk of a metabird, we sample random deltas from a normal distribution and apply them to the hyperparameters.
+Flying to a new position is done choosing random values for the hyperparameters.
+
+The problem with these simple implementations is, that they can produce invalid values.
+Specifically,the following conditions must be met:
+
+- the sum of the move probabilities cannot exceed one
+- the top-b join percentage must be large enough to include at least one bird
+- the number of birds cannot be negative.
+
+Since these meta-moves do not contribute a lot to the overall runtime, we decided to solve this by simply sampling new configurations until we find one that is valid.
+
+To evaluate the cost of a metabird, we run create a TSP solver with birds configuration, run it 8 times and average the results.
+
+We ran the metabirds algorithm multiple times with different problems (eil101, d493, dsj1000, fnl4461) to optimize for different TSP sizes.
+To make these runs, which took multiple days, feasible, the algorithm was compiled to native code using GraalVM and executed on cloud resources.
+
+// TODO: Results and observations from the metabird runs
+
+/*
+#import "@preview/plotst:0.2.0": *
+
+#let histogram_test_2() = {
+  /*let data = (
+    (101, 30000000 / 619),
+    (493, 20000000 / 817),
+    (1000, 5000000 / 386),
+    (4461, 500000 / 10),
+  )*/
+  let data = (
+    (101, 0.2235857343494696),
+    (493, 0.050676743875328945),
+    (1000, 0.19409974797046914),
+    (4461, 0.3314722966118387),
+  )
+
+  // Create the axes used for the chart 
+  let x_axis = axis(min: 0, max: 4461, step: 1000, location: "bottom")
+  let y_axis = axis(min: 0, max: max(0.1, 0.3), location: "left", helper_lines: false)
+
+  // Combine the axes and the data and feed it to the plot render function.
+  let pl = plot(data: data, axes: (x_axis, y_axis))
+  graph_plot(pl, (100%, 25%))
+}
+
+#histogram_test_2()
+*/

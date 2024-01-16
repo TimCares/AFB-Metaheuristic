@@ -13,7 +13,7 @@
       email: "tim.cares@stud.hs-hannover.de"
     ),
     (
-      name: "Pit Hüne",
+      name: "Pit Simon Hüne",
       department: [Fakultät IV],
       organization: [Hochschule Hannover],
       location: [Hanover, Germany],

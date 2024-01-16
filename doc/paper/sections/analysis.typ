@@ -1,6 +1,4 @@
-== Analysis <Analysis>
-
-== Metabirds <Metabirds>
+= Analysis <Analysis>
 
 == Intuitions on our Improvements <Intuitions>
 
