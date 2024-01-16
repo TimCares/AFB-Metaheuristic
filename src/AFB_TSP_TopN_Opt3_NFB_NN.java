@@ -3,9 +3,9 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-// Initialize routes using the nearest neighbor algorithm.
-public class AFB_TSP_TopN_NN extends AFB_TSP_TopN {
-    public AFB_TSP_TopN_NN(
+// AFB for TSP with 3-opt local search for big birds, big birds can only walk.
+public class AFB_TSP_TopN_Opt3_NFB_NN extends AFB_TSP_TopN_Opt3_NFB {
+    public AFB_TSP_TopN_Opt3_NFB_NN(
             int n_birds,
             double probMoveRandom,
             double probMoveBest,
@@ -17,14 +17,6 @@ public class AFB_TSP_TopN_NN extends AFB_TSP_TopN {
             double joinTop) {
         super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
     }
-
-    /*
-     * @Override
-     * void fly(int birdIndex) {
-     * Bird<int[]> bird = this.birds.get(birdIndex);
-     * bird.position = getNearestNeighborTour();
-     * }
-     */
 
     @Override
     void init() {
@@ -82,4 +74,5 @@ public class AFB_TSP_TopN_NN extends AFB_TSP_TopN {
         }
         return minCity;
     }
+
 }

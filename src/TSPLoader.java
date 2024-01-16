@@ -157,15 +157,13 @@ public class TSPLoader {
 
     public static Set<String> listFiles(boolean includeGeoProblems, int maxSize) {
         ArrayList<String> tests = new ArrayList<String>(Arrays.asList(
-            "eil101.tsp", "pr1002.tsp", "pr2392.tsp"
-        ));
+                "eil101.tsp", "pr1002.tsp", "pr2392.tsp"));
         return Stream.of(Objects.requireNonNull(new File("./data/tsp/").listFiles()))
                 .filter(file -> !file.isDirectory())
                 .map(File::getName)
                 .filter(file -> !geoProblems.contains(file))
                 .filter(file -> maxSize <= 0 || Integer.parseInt(file.replaceAll("[^0-9]", "")) <= maxSize)
-                .filter(file -> tests.contains(file))
-                .map((x) -> "./data/tsp/" + x)
+                .map((x) -> "../data/tsp/" + x)
                 .collect(Collectors.toSet());
     }
 

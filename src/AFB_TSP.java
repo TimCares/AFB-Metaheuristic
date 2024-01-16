@@ -7,43 +7,41 @@ import java.util.stream.Collectors;
 public class AFB_TSP extends AFB<int[]> {
     protected int n_cities;
     protected double[][] tsp;
-  
-    public AFB_TSP(
-        int n_birds,
-        double probMoveRandom,
-        double probMoveBest,
-        double probMoveJoin,
-        double smallBirdRatio,
-        int max_iters,
-        double[][] tsp,
-        Random rand
-    ) {
-      super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
 
-      this.n_cities = tsp.length;
-      Logger.log("Processing TSP with length " + this.n_cities);
-      this.tsp = tsp;
+    public AFB_TSP(
+            int n_birds,
+            double probMoveRandom,
+            double probMoveBest,
+            double probMoveJoin,
+            double smallBirdRatio,
+            int max_iters,
+            double[][] tsp,
+            Random rand) {
+        super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
+
+        this.n_cities = tsp.length;
+        Logger.debug("Processing TSP with length " + this.n_cities);
+        this.tsp = tsp;
     }
 
     @Override
     int[] clone(int[] old) {
-      return old.clone();
+        return old.clone();
     }
 
     @Override
     void init() {
         this.birds = new ArrayList<Bird<int[]>>(this.n_birds);
 
-        for (int birdIndex=0; birdIndex<this.n_birds; birdIndex++) {
+        for (int birdIndex = 0; birdIndex < this.n_birds; birdIndex++) {
             Bird<int[]> newBird = new Bird<int[]>(
-                new int[this.n_cities],
-                0.0,
-                new int[this.n_cities],
-                0.0,
-                false,
-                BirdMove.FlyRandom
-            );
-            for (int cityIndex=0; cityIndex<this.n_cities; cityIndex++) {
+                    new int[this.n_cities],
+                    0.0,
+                    new int[this.n_cities],
+                    0.0,
+                    false,
+                    BirdMove.FlyRandom);
+            for (int cityIndex = 0; cityIndex < this.n_cities; cityIndex++) {
                 newBird.position[cityIndex] = cityIndex;
                 newBird.bestPosition[cityIndex] = cityIndex;
             }
@@ -55,7 +53,7 @@ public class AFB_TSP extends AFB<int[]> {
             newBird.bestCost = newBird.cost;
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
-        Logger.log("[DEBUG]: Initialization done.");
+        Logger.debug("Initialization done.");
     }
 
     @Override
@@ -64,16 +62,17 @@ public class AFB_TSP extends AFB<int[]> {
         int[] route = bird.position;
         double cost = 0;
         for (int j = 1; j < this.n_cities; j++) {
-            cost += this.tsp[route[j-1]][route[j]];
+            cost += this.tsp[route[j - 1]][route[j]];
         }
-        cost += this.tsp[route[this.n_cities-1]][route[0]];
+        cost += this.tsp[route[this.n_cities - 1]][route[0]];
         bird.cost = cost;
     }
 
     @Override
     void fly(int birdIndex) {
         Bird<int[]> bird = this.birds.get(birdIndex);
-        ArrayList<Integer> boxedRoute = Arrays.stream(bird.position).boxed().collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<Integer> boxedRoute = Arrays.stream(bird.position).boxed()
+                .collect(Collectors.toCollection(ArrayList::new));
         Collections.shuffle(boxedRoute);
         bird.position = boxedRoute.stream().mapToInt(i -> i).toArray();
     }
@@ -84,21 +83,22 @@ public class AFB_TSP extends AFB<int[]> {
         Bird<int[]> bird = this.birds.get(i);
         int delta = 0;
         int k = -1;
-        for (int u=0; u<100; u++) {
+        for (int u = 0; u < 100; u++) {
             Bird<int[]> otherBird = randomBirdExcept(i);
             k = this.rand.nextInt(this.n_cities - 1) + 1;
             assert k >= 1 && k < this.n_cities;
-            int delta_new = findPositionOfCityInTour(bird.position[k], otherBird) - findPositionOfCityInTour(bird.position[k-1], otherBird);
+            int delta_new = findPositionOfCityInTour(bird.position[k], otherBird)
+                    - findPositionOfCityInTour(bird.position[k - 1], otherBird);
             int delta_new_abs = Math.abs(delta_new);
-            if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
+            if ((1 < delta_new_abs) && (delta_new_abs < (this.n_cities - 1))) {
                 delta = delta_new;
                 break;
             }
         }
         assert k != -1;
         if (delta == 0) {
-            delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1
-            assert delta >= 2 && delta <= this.n_birds-1;
+            delta = this.rand.nextInt(this.n_birds - 2) + 2; // between 2 and n-1
+            assert delta >= 2 && delta <= this.n_birds - 1;
         }
         int l = (k + delta + this.n_cities) % this.n_cities;
         assert l >= 0;
@@ -111,22 +111,24 @@ public class AFB_TSP extends AFB<int[]> {
         reverseInRange(newRoute, k, l);
         bird.position = newRoute;
     }
-    
-    // Reverses the order of the elements in the range [startInclusive, endExclusive) of the given array.
+
+    // Reverses the order of the elements in the range [startInclusive,
+    // endExclusive) of the given array.
     public static void reverseInRange(int[] route, int startInclusive, int endExclusive) {
         int start = Math.min(startInclusive, endExclusive);
         int end = Math.max(startInclusive, endExclusive);
         assert start <= end;
-        for (int u = start, v = end-1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
+        for (int u = start, v = end - 1; u < v; u++, v--) { // l-1 => Figure 2 in the Paper!
             int temp = route[u];
             route[u] = route[v];
             route[v] = temp;
         }
     }
 
-    // Performs a linear search for the position of the city with index 'cityIndex' in the route of bird 'bird'.
+    // Performs a linear search for the position of the city with index 'cityIndex'
+    // in the route of bird 'bird'.
     protected int findPositionOfCityInTour(int cityIndex, Bird<int[]> bird) {
-        for (int routeIndex=0; routeIndex<this.n_cities; routeIndex++) {
+        for (int routeIndex = 0; routeIndex < this.n_cities; routeIndex++) {
             if (bird.position[routeIndex] == cityIndex) {
                 return routeIndex;
             }

@@ -74,7 +74,6 @@ abstract public class AFB<T> {
     }
 
     protected AFBResult<T> solve() {
-        init();
         this.curr_iters = 0;
 
         long start = System.currentTimeMillis();

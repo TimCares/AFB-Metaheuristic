@@ -10,12 +10,11 @@ public class AFB_TSP_TopN_Opt3_NN extends AFB_TSP_TopN_Opt3 {
             double probMoveRandom,
             double probMoveBest,
             double probMoveJoin,
-            double smallBirdRatio,  
+            double smallBirdRatio,
             int max_iters,
             double[][] tsp,
             Random rand,
-            double joinTop
-    ) {
+            double joinTop) {
         super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand, joinTop);
     }
 
@@ -23,16 +22,15 @@ public class AFB_TSP_TopN_Opt3_NN extends AFB_TSP_TopN_Opt3 {
     void init() {
         this.birds = new ArrayList<Bird<int[]>>(this.n_birds);
 
-        for (int birdIndex=0; birdIndex<this.n_birds; birdIndex++) {
+        for (int birdIndex = 0; birdIndex < this.n_birds; birdIndex++) {
             int[] nnTour = getNearestNeighborTour();
             Bird<int[]> newBird = new Bird<int[]>(
-                nnTour,
-                0.0,
-                nnTour,
-                0.0,
-                false,
-                BirdMove.FlyRandom
-            );
+                    nnTour,
+                    0.0,
+                    nnTour,
+                    0.0,
+                    false,
+                    BirdMove.FlyRandom);
             this.birds.add(newBird);
             newBird.lastMove = BirdMove.FlyRandom;
             cost(birdIndex);
@@ -40,13 +38,13 @@ public class AFB_TSP_TopN_Opt3_NN extends AFB_TSP_TopN_Opt3 {
             newBird.bestCost = newBird.cost;
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
-        Logger.log("[DEBUG]: Initialization done.");
+        Logger.debug("Initialization done.");
     }
 
     // Perform the greedy nearest neighbor algorithm to get a tour.
     private int[] getNearestNeighborTour() {
         Set<Integer> unvisited = new HashSet<Integer>();
-        for (int i=0; i<this.n_cities; i++) {
+        for (int i = 0; i < this.n_cities; i++) {
             unvisited.add(i);
         }
         int[] tour = new int[this.n_cities];
@@ -63,7 +61,7 @@ public class AFB_TSP_TopN_Opt3_NN extends AFB_TSP_TopN_Opt3 {
         }
         return tour;
     }
-    
+
     private int getNearestNeighbor(int city, Set<Integer> unvisited) {
         double minCost = Double.MAX_VALUE;
         int minCity = -1;

@@ -14,11 +14,11 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        boolean statistics = true;
-        boolean all = true;
+        boolean statistics = false;
+        boolean all = false;
 
-        StatsCreator statsCreator = new StatsCreator();
         if (statistics) {
+            StatsCreator statsCreator = new StatsCreator();
             statsCreator.collectStatistics();
             return;
         }
@@ -31,7 +31,7 @@ public class Main {
         }
         Map<String, Integer> getBestCosts = TSPLoader.getBestCosts();
 
-        int n_trails_per_problem = 10;
+        int n_trails_per_problem = 1;
 
         int size = files.size() * n_trails_per_problem;
 
@@ -44,9 +44,9 @@ public class Main {
         AFBResult<int[]> res = null;
 
         Random rand = new Random();
-        rand.setSeed(42);
+        // rand.setSeed(42);
 
-        for (int k=0; k< n_trails_per_problem; k++) {
+        for (int k = 0; k < n_trails_per_problem; k++) {
             for (String filePath : files) {
                 System.out.println("Problem: " + filePath);
 
@@ -54,6 +54,29 @@ public class Main {
                 double[][] tsp = TSPLoader.generateTSPFromNodes(dataset.getNodes());
                 Fitness fitness = new Fitness(dataset);
 
+                /*
+                 * Distance: 642.0
+                 * Time: 320.3 seconds
+                 * Params:
+                 * n_birds: 10
+                 * smallBirdRatio: 0.7419395628645755
+                 * probMoveRandom: 0.1082600970034423
+                 * probMoveBest: 0.15194589661101174
+                 * probMoveJoin: 0.49484682113641254
+                 * topJoin: 0.49484682113641254
+                 */
+                /*
+                 * AFB<int[]> solver = new AFB_TSP_TopN_Opt3_NN(
+                 * 100,
+                 * 0.3784287179875597,
+                 * 0.13642362296961053,
+                 * 0.4362829094329638,
+                 * 0.18874635751015767, // 0.75,
+                 * 5_000_000,
+                 * tsp,
+                 * rand,
+                 * 0.6487936445670887);
+                 */
 
                 AFB<int[]> solver = null;
                 if (tsp.length <= 101) {
@@ -112,6 +135,7 @@ public class Main {
                 }
 
                 long start = System.currentTimeMillis();
+                solver.init();
                 res = solver.solve();
                 double time = (System.currentTimeMillis() - start) / 1000F;
 
@@ -125,7 +149,7 @@ public class Main {
                 int[] tour = res.bestPosition;
 
                 ArrayList<Evaluable> examples = new ArrayList<>();
-                for (int j=0; j< tour.length; j++) {
+                for (int j = 0; j < tour.length; j++) {
                     tour[j]++;
                 }
                 ExamplePath solution = new ExamplePath(tour);
@@ -142,7 +166,8 @@ public class Main {
                 }
                 System.out.println();
             }
-            System.out.println("------------------------------------------------Problems done: " + i + "------------------------------------------------");
+            System.out.println("------------------------------------------------Problems done: " + i
+                    + "------------------------------------------------");
         }
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);
@@ -167,11 +192,11 @@ public class Main {
     }
 
     public static double median(double[] m) {
-        int middle = m.length/2;
-        if (m.length%2 == 1) {
+        int middle = m.length / 2;
+        if (m.length % 2 == 1) {
             return m[middle];
         } else {
-            return (m[middle-1] + m[middle]) / 2.0;
+            return (m[middle - 1] + m[middle]) / 2.0;
         }
     }
 
@@ -184,12 +209,13 @@ public class Main {
     }
 }
 
-class ExamplePath extends Evaluable{
+class ExamplePath extends Evaluable {
     ArrayList<Integer> path;
+
     public ExamplePath(int[] path) {
         // wandelt int[] in eine ArrayList um
         this.path = new ArrayList<>();
-        for(int x : path){
+        for (int x : path) {
             this.path.add(x);
         }
     }

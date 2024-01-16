@@ -113,7 +113,7 @@ public class AFB_old {
     }
 
     private void cost(int i) { // after each iteration for each bird simultaneously?
-        if ((this.curr_iters % 100) == 0) System.out.println("[DEBUG]: Iteration: " + this.curr_iters);
+        if ((this.curr_iters % 100) == 0) System.out.println("Iteration: " + this.curr_iters);
 
         double cost = 0;
         for (int j = 1; j < this.n_cities; j++) {

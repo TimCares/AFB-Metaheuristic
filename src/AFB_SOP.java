@@ -67,7 +67,7 @@ public class AFB_SOP extends AFB<int[]> {
         super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, rand);
 
         this.n_cities = sop.length;
-        Logger.log("Processing SOP with length " + this.n_cities);
+        Logger.debug("Processing SOP with length " + this.n_cities);
         this.sop = sop;
 
         // Find all cities that have no dependencies and initialize the dependency
@@ -117,7 +117,7 @@ public class AFB_SOP extends AFB<int[]> {
             newBird.bestCost = newBird.cost;
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
-        Logger.log("[DEBUG]: Initialization done.");
+        Logger.debug("Initialization done.");
     }
 
     // Returns a set of cities that must be visited before cityIndex.

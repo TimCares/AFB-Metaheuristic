@@ -40,7 +40,7 @@ public class AFB_TSP_TopN_Opt3_S_NN extends AFB_TSP_TopN_Opt3_S {
             newBird.bestCost = newBird.cost;
             newBird.isBigBird = rand.nextDouble() > this.smallBirdRatio;
         }
-        Logger.log("[DEBUG]: Initialization done.");
+        Logger.debug("Initialization done.");
     }
 
     // Perform the greedy nearest neighbor algorithm to get a tour.

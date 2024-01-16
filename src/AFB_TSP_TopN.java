@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 public class AFB_TSP_TopN extends AFB_TSP {
     private int joinTopN; // The number of best performing birds to join.
     protected int[] birdOrder;
-    
+
     public AFB_TSP_TopN(
             int n_birds,
             double probMoveRandom,
@@ -17,10 +17,9 @@ public class AFB_TSP_TopN extends AFB_TSP {
             int max_iters,
             double[][] tsp,
             Random rand,
-            double joinTop
-    ) {
+            double joinTop) {
         super(n_birds, probMoveRandom, probMoveBest, probMoveJoin, smallBirdRatio, max_iters, tsp, rand);
-        this.joinTopN = (int) Math.ceil(joinTop*this.n_birds);
+        this.joinTopN = (int) Math.ceil(joinTop * this.n_birds);
     }
 
     public AFBResult<int[]> solve() {
@@ -67,12 +66,11 @@ public class AFB_TSP_TopN extends AFB_TSP {
         }
         long time = (System.currentTimeMillis() - start);
 
-        int bestBirdIndex =  calcBestResult();
+        int bestBirdIndex = calcBestResult();
         return new AFBResult<int[]>(
                 this.birds.get(bestBirdIndex).bestPosition,
                 this.birds.get(bestBirdIndex).bestCost,
-                time
-        );
+                time);
     }
 
     @Override
@@ -81,21 +79,22 @@ public class AFB_TSP_TopN extends AFB_TSP {
         Bird<int[]> bird = this.birds.get(i);
         int delta = 0;
         int k = -1;
-        for (int u=0; u<100; u++) {
+        for (int u = 0; u < 100; u++) {
             Bird<int[]> otherBird = randomBirdAllExcept(i);
             k = this.rand.nextInt(this.n_cities - 1) + 1;
             assert k >= 1 && k < this.n_cities;
-            int delta_new = findPositionOfCityInTour(bird.position[k], otherBird) - findPositionOfCityInTour(bird.position[k-1], otherBird);
+            int delta_new = findPositionOfCityInTour(bird.position[k], otherBird)
+                    - findPositionOfCityInTour(bird.position[k - 1], otherBird);
             int delta_new_abs = Math.abs(delta_new);
-            if ( (1 < delta_new_abs) && (delta_new_abs < (this.n_cities-1)) ) {
+            if ((1 < delta_new_abs) && (delta_new_abs < (this.n_cities - 1))) {
                 delta = delta_new;
                 break;
             }
         }
         assert k != -1;
         if (delta == 0) {
-            delta = this.rand.nextInt(this.n_birds-2)+2; // between 2 and n-1
-            assert delta >= 2 && delta <= this.n_birds-1;
+            delta = this.rand.nextInt(this.n_birds - 2) + 2; // between 2 and n-1
+            assert delta >= 2 && delta <= this.n_birds - 1;
         }
         int l = (k + delta + this.n_cities) % this.n_cities;
         assert l >= 0;
@@ -113,7 +112,8 @@ public class AFB_TSP_TopN extends AFB_TSP {
         int j = excludedBirdIndex;
         while (j == excludedBirdIndex) {
             j = this.birdOrder[this.rand.nextInt(this.joinTopN)];
-            if (this.joinTopN == 1 && j==excludedBirdIndex) return this.birds.get(excludedBirdIndex);
+            if (this.joinTopN == 1 && j == excludedBirdIndex)
+                return this.birds.get(excludedBirdIndex);
         }
         return this.birds.get(j);
     }
@@ -128,10 +128,10 @@ public class AFB_TSP_TopN extends AFB_TSP {
 
     protected int calcBestResult() {
         this.birdOrder = IntStream.range(0, this.birds.size())
-            .boxed()
-            .sorted(Comparator.comparing(i -> this.birds.get(i).bestCost))
-            .mapToInt(Integer::intValue)
-            .toArray();
+                .boxed()
+                .sorted(Comparator.comparing(i -> this.birds.get(i).bestCost))
+                .mapToInt(Integer::intValue)
+                .toArray();
         return this.birdOrder[0];
     }
 }
