@@ -1,6 +1,9 @@
-\section{Analysis}
-\subsection{Metabirds}
-\subsection{Intuitions on our Improvements} \label{Intuitions on our Improvements}
+== Analysis <Analysis>
+
+== Metabirds <Metabirds>
+
+== Intuitions on our Improvements <Intuitions>
+
 Swarm algorithm usually include action of agents which can either be classified as exploitation or exploration.
 Exploitation means an agent uses its current result and tries to improve it, i.e. the agent continues to go into the direction he previously went in the search tree/space.
 For AFB, this is can be achieved using the walk move, so a local search.
@@ -39,7 +42,8 @@ It exploits good solutions in a harsh manner while also being able to switch to 
 This process will be repeated until a solution is reached that will either be close to the optimum, or a local minimum.
 Either way, the algorithm converges.
 
-\subsection{Exploitators and Explorators}
+== Exploitators and Explorators <ExploitatorsAndExplorators>
+
 The base algorithm consists of two types of agents, small and big birds.
 With our improvements it may have been noticeable that we separated the roles
 of both agent types more and more from each other:
@@ -59,7 +63,7 @@ improving that solution using 3-opt (walk).
 The circumstance that small birds can also perform exploitation, using their own version of the walk move,
 is owed to the fact that they otherwise would only be able to perform
 the fly move, i.e. jumping between random solutions.
-This wouldn’t be a good foundation for the join behavior of big birds (see Table \ref{small_birds_only_fly}),
+This wouldn’t be a good foundation for the join behavior of big birds (see @small_birds_only_fly),
 which is essential for the performance of our algorithm.
 Also, since big birds can also join other big birds,
 and the solutions for small birds would be rather poor, the probability that
@@ -76,18 +80,18 @@ join other big birds, and that small birds, whose only purpose is to perform
 the fly move (so not even returning to their best solution), provide no value to the algorithm.
 This is exactly why we decided that small birds are also able to perform the walk move.
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{ |p{1.5cm}||p{1.2cm}|p{1.2cm}|p{2cm}| }
- \hline
- Configuration& \textbf{Regular} & Only fly& No small birds\\
- \hline \hline
-PercentError & \textbf{8} & 15 & 10\\
-\hline
-\end{tabular}
-\caption{If small birds are only able to fly, the algorithm performs worse than before.
+#figure(
+  table(
+    columns: 4,
+    inset: 3pt,
+    gutter: (1pt, 0pt),
+    stroke: 0.5pt,
+    align: horizon,
+    [Configuration], [*Regular*], [Only fly], [No small birds],
+    [PercentError], [*8*], [15], [10],
+  ),
+  caption: [If small birds are only able to fly, the algorithm performs worse than before.
 Notice however that it still achieves a reasonable performance.
 For our experiments we continuously used 200 birds, 150 of them being small birds.
-So by removing all small birds for experiment (2), we are left with 50 (big) birds.}
-\label{small_birds_only_fly}
-\end{table}
+So by removing all small birds for experiment (2), we are left with 50 (big) birds.],
+) <small_birds_only_fly>
