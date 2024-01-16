@@ -32,8 +32,7 @@ We decide to update the list after each bird has performed one move (after each 
 This will still increase the computational complexity, but we think that this is better than updating the list after each move, as this would be too costly.
 
 We test numerous values for $b$ and decide to build on $b=0.01$ for future improvement, as this strategy yields the best results (@top_b_performance).
-// TODO: Was ist hier gemeint? Abschnitt "Algorithm Stability" gibt es nicht.
-// For intuitions on why such a low value performs this good, please refer to @AlgorithmStability.
+For intuitions on why such a low value performs this good, please refer to @Intuitions.
 
 #figure(
   table(
