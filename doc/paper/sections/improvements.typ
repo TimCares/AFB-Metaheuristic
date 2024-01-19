@@ -112,14 +112,24 @@ seems to be no downside to this approach.
   caption: [Comparison of 2-opt and 3-opt. Time is measured as the median runtime in seconds, over all 860 tests.],
 ) <three_opt_big_small_performance>
 
-== Nearest-Neighbor Initialization <NearestNeighborInitialization>
+== Nearest Neighbor Initialization <NearestNeighborInitialization>
+
+So far, we have always initialized the birds with a random tour.
+While this allows for a very wide exploration, it also means that the algorithm needs many iterations to reach the first competitive solutions.
+To speed up convergence, we decided to use a simple heuristic to generate initial tours.
+Initially, we tried to implement the Christofides algorithm, which is the best-known polynomial-time heuristic for solving the TSP and provides a $3/2$-approximation.
+However, due to the complexity of the algorithm and the relatively long worst-case runtime of $O(n^3)$ @christofides, we decided to use the nearest neighbor heuristic instead.
+This heuristic is very simple, has a worst-case runtime of $O(n^2)$ @nearest_neighbor, and still provides very good solutions.
+
+Adding the heuristic initialization had a negligible impact on the runtime, which makes sense since the initialization is done only once.
+However, the results improved dramatically from an average error of $44%$ with random initialization to now $8%$.
 
 == Early Stopping <EarlyStopping>
 
 If we analyze the convergence behavior by plotting the cost of the best solution over the number of iterations
 (Figure TODO),
 we notice that our improved version of the algorithm converges much faster than the original algorithm,
-even without a Nearest-Neighbor initialization. Because it is difficult to estimate how many iterations
+even without a nearest neighbor initialization. Because it is difficult to estimate how many iterations
 are needed for a certain problem, and adapting the number of iterations to the problem at hand would
 be cumbersome, we decide to implement an early stopping mechanism.
 That way we do not waste computational resources on iterations that do not improve an existing solution,
@@ -176,28 +186,33 @@ To evaluate the cost of a metabird, we run create a TSP solver with birds config
 We ran the metabirds algorithm multiple times with different problems (eil101, d493, dsj1000, fnl4461) to optimize for different TSP sizes.
 To make these runs, which took multiple days, feasible, the algorithm was compiled to native code using GraalVM and executed on cloud resources.
 
-// TODO: Results and observations from the metabird runs
 
 /*
+// TODO: Results and observations from the metabird runs
+
 #import "@preview/plotst:0.2.0": *
 
 #let histogram_test_2() = {
-  /*let data = (
-    (101, 30000000 / 619),
+  let data = (
+    (101, 20000000 / 619 / 2),
+    (493, 20000000 / 817 / 10),
+    (1000, 5000000 / 386 / 5),
+    (4461, 500000 / 10 / 10),
+    /*(101, 20000000 / 619),
     (493, 20000000 / 817),
     (1000, 5000000 / 386),
-    (4461, 500000 / 10),
-  )*/
-  let data = (
+    (4461, 500000 / 10),*/
+  )
+  /*let data = (
     (101, 0.2235857343494696),
     (493, 0.050676743875328945),
     (1000, 0.19409974797046914),
     (4461, 0.3314722966118387),
-  )
+  )*/
 
   // Create the axes used for the chart 
   let x_axis = axis(min: 0, max: 4461, step: 1000, location: "bottom")
-  let y_axis = axis(min: 0, max: max(0.1, 0.3), location: "left", helper_lines: false)
+  let y_axis = axis(min: 0, max: 20000, step: 5000, location: "left", helper_lines: false)
 
   // Combine the axes and the data and feed it to the plot render function.
   let pl = plot(data: data, axes: (x_axis, y_axis))
@@ -206,3 +221,5 @@ To make these runs, which took multiple days, feasible, the algorithm was compil
 
 #histogram_test_2()
 */
+
+// TODO: One observation might be, that random flying is not completely useless.
