@@ -19,8 +19,9 @@ If exploitation is too dominant, then the algorithm might get stuck in a local m
 
 As might have come apparent in the sections prior, the main focus of this paper
 was on exploitation (improving a good solution).
-This is mainly done by the introduction of 3-opt and that big birds can only join successful birds.
-Even though the latter cannot be seen directly as a local search, is does lead to more (big) birds performing exploitation of the solutions of other birds.
+This is mainly done by the introduction of 3-opt and that big birds can only join (the most) successful birds.
+Even though the latter cannot be seen directly as a local search,
+it does lead to more (big) birds performing exploitation of good solutions they adapted from other birds.
 
 We explicitly do not modify the fly move, i.e. selecting a random tour, as this provides us with a rich selection of other possible solution, which at the same time is completely independent of the current solution (of an agent).
 
@@ -53,12 +54,12 @@ exploration and exploitation, a more explicit part of the algorithm:
 We delegate small birds to the role of explorators, and big birds to the role of exploitators.
 
 Small birds are able to access vastly different areas of the search space for possible better
-solutions than their current one. Using the fly-move, big birds are able to profit
-from those birds that have found the best current solution by joining them and
+solutions than their current one. Using the join-move, big birds are able to profit
+from those that have found the best current solution by joining them and
 improving that solution using 3-opt (walk).
 
 
-The circumstance that small birds can also perform exploitation, using their own version of the walk move,
+The circumstance that small birds can also perform exploitation, using their own version of the walk move (2-opt),
 is owed to the fact that they otherwise would only be able to perform
 the fly move, i.e. jumping between random solutions.
 This wouldn’t be a good foundation for the join behavior of big birds (see @small_birds_only_fly),
@@ -72,7 +73,6 @@ Exactly this can be verified by simply comparing how
 the algorithm performs when (1) small birds can only fly,
 (2) all small birds are removed from the algorithm, and only big birds are kept.
 
-// TODO: @Tim hast du hier bei dem Experiment ohne kleine Vögel die Iterationsanzahl entsprechend angepasst? Wenn nicht, und 50 Vögel die selbe Iterationsanzahl hatten wie 200 würde es mich nämlich nicht wundern, dass die 50 gut performen (sehr hohe Suchtiefe).
 Surprisingly, the results show us that configuration (2) performs even better
 than variant (1), indicating that in (1) the big birds only
 join other big birds, and that small birds, whose only purpose is to perform 
