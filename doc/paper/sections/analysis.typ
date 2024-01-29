@@ -94,5 +94,10 @@ This is exactly why we decided that small birds are also able to perform the wal
     Notice however that it still achieves a reasonable performance.
     For our experiments we continuously used 200 birds, 150 of them being small birds.
     So by removing all small birds for experiment (2), we are left with 50 (big) birds.
-  ],
+    ],
 ) <small_birds_only_fly>
+
+It is important to note that to make this experiment fair, we also reduced the number of iterations by a factor
+of three quarters (same ratio with which birds have been reduced), so that
+the search depth, meaning the average number of steps each bird can perform in the search space,
+is the same as if we use the regular 200 birds (compare with @CANOF).
