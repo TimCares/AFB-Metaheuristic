@@ -2,22 +2,16 @@
 
 == Considerations about number of birds
 
-If we study the effects of how different number of birds change the solution of different tours, we learn that less birds seem to yield better solutions. At first this may seem counterintuitive, but there is an intuitive explanation to this:
+When we study the effects of how different numbers of birds change the solution of different tours, we learn that fewer birds seem to yield better solutions.
+This may seem counterintuitive at first, but there is an intuitive explanation:
 
-The basic algorithm defines one iteration as the calculation for the cost of one tour. Now, let a phase of the algorithm denote each bird performing one move. So, in each phase each bird performs one move.
-If we now use more birds the number of phases the algorithm will run through will decrease, as in each phase the length of more tours will be calculated, which will use up more iterations. Therefore, the more birds we have, the more iterations we will use up per phase, which means the algorithm will run through less phases until it stops. 
-Because in one phase each bird can perform one move, fewer phases mean each bird can perform fewer moves. 
-Less moves in turn leads to a less pronounced search of possible solutions,
-which will make the algorithm worse.
-This is why the fewer birds we have, the better the results will be.
-Examples can be seen in Figure ... (fig about relationship n birds x cost).
+The basic algorithm defines each evaluation of the cost of a tour as an iteration.
+The total number of iterations is simply divided among the birds.
+Therefore, if we increase the number of birds, we decrease the number of iterations _per bird_.
+This results in shallower searches and less exploitation of the search space, which can lead to worse results.
 
-One could avoid this by simply increasing the number of iterations,
-which balances the relationship between number of birds used and the results obtained.
-However, this inevitable leads to longer running times.
-
-Consequently, we focus on improving the bird behavior,
-so that each bird needs fewer overall steps to achieve a good solution.
+One could avoid this by simply increasing the number of iterations, but this inevitably leads to longer running times.
+Instead, we focus on improving the bird's behavior so that each bird needs fewer steps to reach a good solution.
 
 == Swarm Behavior <SwarmBehavior>
 
