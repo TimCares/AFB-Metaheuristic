@@ -29,6 +29,6 @@
 #include "sections/algorithm_foundation.typ"
 #include "sections/methodology.typ"
 #include "sections/improvements.typ"
+#include "sections/sop.typ"
 #include "sections/analysis.typ"
-// #include "sections/sop.typ"
 
