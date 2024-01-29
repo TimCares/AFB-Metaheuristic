@@ -42,7 +42,7 @@ For intuitions on why such a low value performs this good, please refer to @Intu
     stroke: 0.5pt,
     align: horizon,
     [Top-b], [1], [0.25], [0.20], [0.15], [0.05], [*0.01*],
-    [PercentError], [215], [122], [5.92], [6.14], [6.01], [*5.2*],
+    [Error (in %)], [215], [122], [5.92], [6.14], [6.01], [*5.2*],
     [Time (in s)], [*7.6*], [8.6], [8.7], [8.1], [8.3], [8.1],
   ),
   caption: [Comparison of different parameters for our top-join. 1 means 100%, so a bird randomly joins another bird. This is our benchmark and the default behaviour of the algorithm. Time is measured as the median runtime in seconds, over all 860 tests.],
@@ -71,7 +71,7 @@ The results can be seen in @3_opt_performance.
     stroke: 0.5pt,
     align: horizon,
     [Configuration], [2-opt], [3-opt],
-    [PercentError], [5.2], [*4.67*],
+    [Error (in %)], [5.2], [*4.67*],
     [Time (in s)], [*8.1*], [9.56],
   ),
   caption: [Comparison of 2-opt and 3-opt. Time is measured as the median runtime in seconds, over all 860 tests.],
@@ -106,7 +106,7 @@ seems to be no downside to this approach.
     stroke: 0.5pt,
     align: horizon,
     [Configuration], [2-opt], [3-opt], [3-opt #linebreak() small birds], [3-opt big birds],
-    [PercentError], [5.2], [4.67], [55%], [*55%*],
+    [Error (in %)], [5.2], [4.67], [55%], [*55%*],
     [Time (in s)], [*8.1*], [9.56], [55], [55],
   ),
   caption: [Comparison of 2-opt and 3-opt. Time is measured as the median runtime in seconds, over all 860 tests.],
@@ -153,13 +153,13 @@ A review during a phase therefore does not make sense.
     stroke: 0.5pt,
     align: horizon,
     [EarlyStopping], [No (default)], [*Yes*],
-    [PercentError], [*8*], [10],
+    [Error (in %)], [*8*], [10],
     [Time (in s)], [42], [*9*],
   ),
   caption: [], // TODO
 ) <early_stopping_performance>
 
-== Metabirds <Metabirds>
+== Choosing Hyperparameters: Metabirds <Metabirds>
 
 Both the original algorithm and our extensions define various hyperparameters like the number of birds, the ratio of small birds, the top-b join percentage, the probabilities of the basic moves
 We have already discussed analytical approaches to choosing some of these values, but these tests were limited and did not capture the possible complex interplay between different hyperparameters.

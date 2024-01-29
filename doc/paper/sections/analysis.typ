@@ -86,7 +86,7 @@ This is exactly why we decided that small birds are also able to perform the wal
     stroke: 0.5pt,
     align: horizon,
     [Configuration], [*Regular*], [Only fly], [No small birds],
-    [PercentError], [*8*], [15], [10],
+    [Error (in %)], [*8*], [15], [10],
   ),
   caption: [If small birds are only able to fly, the algorithm performs worse than before.
 Notice however that it still achieves a reasonable performance.

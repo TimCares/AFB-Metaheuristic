@@ -31,4 +31,5 @@
 #include "sections/improvements.typ"
 #include "sections/sop.typ"
 #include "sections/analysis.typ"
+#include "sections/conclusion.typ"
 
