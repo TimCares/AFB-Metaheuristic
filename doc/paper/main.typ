@@ -32,4 +32,5 @@
 #include "sections/sop.typ"
 #include "sections/analysis.typ"
 #include "sections/conclusion.typ"
+#include "sections/appendix.typ"
 
