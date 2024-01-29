@@ -72,6 +72,7 @@ Exactly this can be verified by simply comparing how
 the algorithm performs when (1) small birds can only fly,
 (2) all small birds are removed from the algorithm, and only big birds are kept.
 
+// TODO: @Tim hast du hier bei dem Experiment ohne kleine Vögel die Iterationsanzahl entsprechend angepasst? Wenn nicht, und 50 Vögel die selbe Iterationsanzahl hatten wie 200 würde es mich nämlich nicht wundern, dass die 50 gut performen (sehr hohe Suchtiefe).
 Surprisingly, the results show us that configuration (2) performs even better
 than variant (1), indicating that in (1) the big birds only
 join other big birds, and that small birds, whose only purpose is to perform 
@@ -88,8 +89,10 @@ This is exactly why we decided that small birds are also able to perform the wal
     [Configuration], [*Regular*], [Only fly], [No small birds],
     [Error (in %)], [*8*], [15], [10],
   ),
-  caption: [If small birds are only able to fly, the algorithm performs worse than before.
-Notice however that it still achieves a reasonable performance.
-For our experiments we continuously used 200 birds, 150 of them being small birds.
-So by removing all small birds for experiment (2), we are left with 50 (big) birds.],
+  caption: [
+    If small birds are only able to fly, the algorithm performs worse than before.
+    Notice however that it still achieves a reasonable performance.
+    For our experiments we continuously used 200 birds, 150 of them being small birds.
+    So by removing all small birds for experiment (2), we are left with 50 (big) birds.
+  ],
 ) <small_birds_only_fly>

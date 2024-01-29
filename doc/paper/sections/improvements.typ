@@ -1,6 +1,6 @@
 = Improvements <Improvements>
 
-== Considerations about number of birds
+== Considerations about the number of birds
 
 When we study the effects of how different numbers of birds change the solution of different tours, we learn that fewer birds seem to yield better solutions.
 This may seem counterintuitive at first, but there is an intuitive explanation:
@@ -15,18 +15,28 @@ Instead, we focus on improving the bird's behavior so that each bird needs fewer
 
 == Swarm Behavior <SwarmBehavior>
 
-Currently, if one big bird made the decision to join another bird, he picks one randomly.
-This means joining any bird without considering how good the position of that bird might be. This contradicts the original idea of the authors that big birds tend to join others that have found a good food source (current solution seems promising) @afb.
-Therefore, we propose that a big will only be able to join the top-b percent of birds that have the lowest current cost. If one chooses the right ratio, we assume that it will automatically nudge the swarm in the direction of the global minimum.
+Currently, when a big bird makes the decision to join another bird, it chooses one at random.
+It does not consider how good the bird's position is.
+This contradicts the author's original idea that big birds tend to join others who have found a good food source (current solution seems promising) @afb.
+Therefore, we propose that a big bird will only join the top-b percent of birds that have the lowest current cost.
+This introduces $b$ as an additional hyperparameter that must be balanced between exploration (higher $b$, more birds to join) and exploitation (lower $b$, join more successful birds).
 
-We implement this by storing the indices $i$ of the birds in an ordered integer array $"ord"$ and introducing a new hyperparameter $b$, denoting which of the top-b percent to join. When we select the bird to join to, we draw a random uniform number $j$ between 1 and $b dot n$ ($n$ denotes the number of birds) and get the index of the bird to join from the ordered array ($"ord"[j]$).
+// The underlying assumption is, that the best birds are more likely to be close to the global minimum.
+// This is not necessarily true, but we think that it is a good approximation.
+// An alternative approach which we did not explore in detail would be to approximate the remaining potential of a birds position.
+// TODO: Der nächste Satz könnte Humbug sein.
+// This would be somewhat analogous to joining birds which have just found food instead of joining birds which are well fed.
 
-The main disadvantage this approach has is that at we need to continuously update $"ord"$ so that we only join the actual top-b percent at the moment of the move.
-We decide to update the list after each bird has performed one move (after each phase).
-This will still increase the computational complexity, but we think that this is better than updating the list after each move, as this would be too costly.
+We implement this by storing the indices $i$ of the birds in an ordered integer array $"ord"$.
+When we select the bird to join, we draw a random uniform number $j$ between 1 and $b dot n$ ($n$ denotes the number of birds) and get the index of the bird to join from the ordered array ($"ord"[j]$).
 
-We test numerous values for $b$ and decide to build on $b=0.01$ for future improvement, as this strategy yields the best results (@top_b_performance).
-For intuitions on why such a low value performs this good, please refer to @Intuitions.
+The main disadvantage of this approach is that we have to continuously update $"ord"$ so that we only join the current top-b percent at the moment of the move.
+We decided to update the list every time all birds have made a move (we call this a _phase_).
+This strikes a balance between more accurate results and less computation.
+We found that updating the list after every move was too costly.
+
+We tested numerous values for $b$ and decided to build on $b=0.01$ for future improvements, as this strategy gives the best results (@top_b_performance).
+For intuitions on why such a low value performs so well, see @Intuitions.
 
 #figure(
   table(
@@ -35,27 +45,35 @@ For intuitions on why such a low value performs this good, please refer to @Intu
     gutter: (1pt, 0pt),
     stroke: 0.5pt,
     align: horizon,
-    [Top-b], [1], [0.25], [0.20], [0.15], [0.05], [*0.01*],
+    [b], [1], [0.25], [0.20], [0.15], [0.05], [*0.01*],
     [Error (in %)], [215], [122], [5.92], [6.14], [6.01], [*5.2*],
     [Time (in s)], [*7.6*], [8.6], [8.7], [8.1], [8.3], [8.1],
   ),
-  caption: [Comparison of different parameters for our top-join. 1 means 100%, so a bird randomly joins another bird. This is our benchmark and the default behaviour of the algorithm. Time is measured as the median runtime in seconds, over all 860 tests.],
+  caption: [
+    Comparison of different parameters for our top-join.
+    $b = 1$ means all birds are potential candidates for joining.
+    This is the behaviour of the original algorithm which is why we use it as a baseline.
+    Time is measured as the median runtime in seconds, over all 860 tests.
+  ],
 ) <top_b_performance>
 
 == 3-opt Walk <3_opt_walk>
 
-For the walk move the algorithm uses a modified version of the 2-opt heuristic as a local search @afb. Instead of using 2-opt, we test a 3-opt variant, as this often yields the best solutions under consideration of computational complexity @lin. At the same time we decide to remove the estimation of local similarity from the algorithm, as the authors did not provide any intuitions why this may be beneficial @afb.
+For the walk move, the original algorithm uses a modified version of the 2-opt heuristic as local search @afb.
+In one step, two tour positions are chosen semi-randomly and the tour is reconnected at these opening points (see @diff_2_opt_3_opt).
+Instead of using 2-opt, we tested a 3-opt variant, as this often yields the best solutions considering the computational complexity @lin.
+At the same time, we decided to remove local similarity estimation from the algorithm, as the authors did not provide any intuition as to why this might be beneficial @afb.
 
-With 3-opt, each bird selects the tour with the lowest cost out of the 7 different tours possible.
-At which 3 points a tour is opened is determined by a random uniform draw of 3 integers,
-denoting the nodes of the tour. Because we now need to calculate the length of each of the possible 7 tours
-in just one move, we decide it will still only cost us one iteration.
+With 3-opt, each bird chooses the tour with the lowest cost from the 7 possible tours (see @diff_2_opt_3_opt).
+At which 3 points a tour is opened is determined by a random uniform draw of 3 integers representing the indices of the nodes in the tour.
+// Ist jetzt zu spät, aber eigentlich ist das sehr unsauber.
+Even though we now have to compute the length of each of the 7 possible tours in just one move, we decided to count this as one iteration.
 The results can be seen in @3_opt_performance.
 
 #figure(
   image("../images/3_opt.png", width: 8cm),
   caption: [Comparison of 2-opt (left) and 3-opt (right) for TSP. Reconnections of category 1 are 2-opt variants @3_opt.],
-)
+) <diff_2_opt_3_opt>
 
 #figure(
   table(
@@ -68,30 +86,42 @@ The results can be seen in @3_opt_performance.
     [Error (in %)], [5.2], [*4.67*],
     [Time (in s)], [*8.1*], [9.56],
   ),
-  caption: [Comparison of 2-opt and 3-opt. Time is measured as the median runtime in seconds, over all 860 tests.],
+  caption: [Comparison of 2-opt and 3-opt. Time is measured as the median runtime in seconds over all 860 tests.],
 ) <3_opt_performance>
 
-== Delegating Responsibility <DelegatingResponsibility>
+== Separating Responsibilities <DelegatingResponsibility>
 
-Because we are not implementing the 3-opt algorithm as an iterative solver by itself,
-but rather in a swarm algorithm, in which each bird (or agent respectively) can perform this action,
-the computational complexity will rise by a margin, as seen in @3_opt_performance.
-In order to now compensate for this increase in complexity, we decide to test if we can delegate
-the responsibility of performing 3-opt to only a subset of the birds. This sounds promising, as
-we can reduce the computational complexity while still being able to profit from the increased exploration of 3-opt.
+We do not implement the 3-opt algorithm as an iterative solver by itself, but rather in a swarm algorithm in which agents can perform a single 3-opt iteration at a time.
+Using 3-opt instead of 2-opt increases the computational complexity, as seen in @3_opt_performance.
+To reduce the impact on runtime, we decided to limit the responsibility of deep exploitation by 3-opt to a subset of birds.
 
-We test the case where only big birds are able to perform a 3-opt walk, while smaller birds
-are only capable of the usual 2-opt walk as specified in the paper. 
-This should not only reduce the computational complexity, but it also pairs well with the 
-assumption that big birds are "superior", as only they can join other birds and therefore profit from them.
+We test the case where only big birds are able to perform a 3-opt walk, while small birds are only able to perform the usual 2-opt walk as specified in the paper. 
+This should not only reduce the computational complexity, but also fits well with the assumption that big birds are "superior", since only they can join other birds and thus benefit from them.
+This effectively divides the flock into two groups: The small birds are responsible for _exploration_ and the big birds are responsible for _exploitation_.
+See @ExploitatorsAndExplorators for details on this separation.
 
-For the sake of completeness we also test the inverse approach: Only small birds can perform 3-opt.
-Surprisingly, for big birds we observed that we can achieve the same performance as before, while
-cutting runtime by half (@three_opt_big_small_performance). Interestingly, for small birds
-we noticed an increased error rate, even though the small bird ratio is always $r > 0.5$ in our experiments.
-Based on the results, we decided to use 3-opt only for big birds in our future experiments, as there
-seems to be no downside to this approach.
+For completeness, we also test the inverse approach: Only small birds can perform 3-opt.
+Surprisingly, restricting 3-opt to big birds achieves the same performance as before, while cutting the runtime in half (@three_opt_big_small_performance).
+Interestingly, we noticed an increased error rate for small birds, even though the ratio of small birds in our experiments is always $r > 0.5$.
+// TODO: What does this mean? Mixing exploration and exploitation is bad?
+Based on these results, we decided to use 3-opt only for big birds in our future experiments, as there seems to be no downside to this approach.
 
+/*
+\begin{table}[h!]
+\centering
+\begin{tabular}{ |p{2cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
+ \hline
+ Configuration& 2-opt & 3-opt & \textbf{3-opt big birds} & 3-opt small birds\\
+ \hline \hline
+PercentError & 69 & \textbf{44} & \textbf{44} & 85\\
+ \hline
+ Time (in s) & \textbf{21} & 85 & 40 & 69\\
+ \hline
+\end{tabular}
+\caption{}
+\label{3_opt_big_small_performance}
+\end{table}
+*/
 #figure(
   table(
     columns: 5,
@@ -99,9 +129,9 @@ seems to be no downside to this approach.
     gutter: (1pt, 0pt),
     stroke: 0.5pt,
     align: horizon,
-    [Configuration], [2-opt], [3-opt], [3-opt #linebreak() small birds], [3-opt big birds],
-    [Error (in %)], [5.2], [4.67], [55%], [*55%*],
-    [Time (in s)], [*8.1*], [9.56], [55], [55],
+    [Configuration], [2-opt], [3-opt], [3-opt big birds], [3-opt #linebreak() small birds],
+    [Error (in %)], [69], [*44*], [*44*], [85],
+    [Time (in s)], [*21*], [85], [40], [69],
   ),
   caption: [Comparison of 2-opt and 3-opt. Time is measured as the median runtime in seconds, over all 860 tests.],
 ) <three_opt_big_small_performance>
@@ -217,3 +247,4 @@ To make these runs, which took multiple days, feasible, the algorithm was compil
 */
 
 // TODO: One observation might be, that random flying is not completely useless.
+// TODO: Metabirds shows how the AFB algorithm can be applied to non discrete problems.
