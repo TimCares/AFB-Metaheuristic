@@ -1,4 +1,4 @@
-= Sequential Ordering Problem
+= Sequential Ordering Problem <sop>
 
 In addition to the TSP, we also applied the AFB algorithm to the Sequential Ordering Problem (SOP).
 The SOP is an extension of the TSP which puts additional contstraints on the order in which nodes are visited.

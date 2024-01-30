@@ -1,4 +1,5 @@
 #set heading(outlined: false, numbering: none)
+#pagebreak()
 = Appendix
 
 #figure(

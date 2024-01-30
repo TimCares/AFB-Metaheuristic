@@ -1,4 +1,4 @@
-= Basic AFB Algorithm
+= Basic AFB Algorithm <algorithm_foundation>
 
 Artificial Feeding Birds (AFB) is a metaheuristic optimization algorithm.
 Unlike most nature-inspired algorithms, AFB is not inspired by rare behaviors exhibited only by a particular species, but by the feeding behavior common to all birds.
