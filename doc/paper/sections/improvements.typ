@@ -20,27 +20,16 @@ Instead, _we_ focus on improving the birds behavior, so that each bird needs few
 
 Currently, if one bird decides to join another, it does so by picking one randomly.
 This means joining any bird without considering how good the position of that bird might be. This contradicts the original idea of the authors that big birds tend to join others that have found a good food source (current solution seems promising) @afb.
-Therefore, we propose that a big will only be able to join the top-b percent of birds that have the lowest current cost. If one chooses the right ratio, we assume that it will automatically nudge the swarm in the direction of the global minimum.
+Therefore, we propose that a big bird will only be able to join the top-b percent of birds that have the lowest current cost. If one chooses the right ratio, we assume that it will automatically nudge the swarm in the direction of the global minimum.
 
 We implement this by storing the indices $i$ of the birds in an ordered integer array $"ord"$ and introducing a new hyperparameter $b$, denoting which of the top-b percent to join. When we select the bird to join to, we draw a random uniform number $j$ between 1 and $b dot n$ ($n$ denotes the number of birds), and get the index of the bird to join from the ordered array ($"ord"[j]$).
-Currently, when a big bird makes the decision to join another bird, it chooses one at random.
-It does not consider how good the bird's position is.
-This contradicts the author's original idea that big birds tend to join others who have found a good food source (current solution seems promising) @afb.
-Therefore, we propose that a big bird will only join the top-b percent of birds that have the lowest current cost.
-This introduces $b$ as an additional hyperparameter that must be balanced between exploration (higher $b$, more birds to join) and exploitation (lower $b$, join more successful birds).
 
-// The underlying assumption is, that the best birds are more likely to be close to the global minimum.
-// This is not necessarily true, but we think that it is a good approximation.
-// An alternative approach which we did not explore in detail would be to approximate the remaining potential of a birds position.
-// TODO: Der nächste Satz könnte Humbug sein.
-// This would be somewhat analogous to joining birds which have just found food instead of joining birds which are well fed.
-
-We implement this by storing the indices $i$ of the birds in an ordered integer array $"ord"$.
-When we select the bird to join, we draw a random uniform number $j$ between 1 and $b dot n$ ($n$ denotes the number of birds) and get the index of the bird to join from the ordered array ($"ord"[j]$).
+This introduces $b$ as an additional hyperparameter with which one can balance the algorithm between exploration (higher $b$ means more birds to join to, and therefore less focus on well performing birds) and exploration (lower $b$ means birds can only join the most successful bird(s), so
+more focus on improving good solutions).
 
 The main disadvantage of this approach is that we have to continuously update $"ord"$ so that we only join the current top-b percent at the moment of the move.
 We decide to update the list after each bird has performed one move, which we call a "phase" (the algorithm
-goes through the phases until the iterations are used up).
+goes through the phases until the iterations are used up, see @phases in Appendix).
 This strikes a balance between more accurate results and less computation, as updating the list after every move is too costly.
 
 We tested numerous values for $b$ and decided to build on $b=0.01$ for future improvements, as this strategy gives the best results (@top_b_performance).
@@ -102,7 +91,7 @@ The results can be seen in @3_opt_performance.
     gutter: (1pt, 0pt),
     stroke: 0.5pt,
     align: horizon,
-    [Configuration], [2-opt], [3-opt],
+    [Configuration], [2-opt], [*3-opt*],
     [Error (in %)], [69], [*44*],
     [Time (in s)], [*21*], [85],
   ),
@@ -240,6 +229,9 @@ A review during a phase therefore does not make sense.
   Overall, we are able to reduce the error for our benchmark problems (see @Methodology)
   by *487%*.],
 ) <early_stopping_performance>
+
+This concludes out improvements on the algorithm. For visualizations of the optimization behavior, and a comparison
+between out incremental improvements, please refer to @pr1002_results and @pr2392_results in the Appendix.
 
 == Choosing Hyperparameters: Metabirds <Metabirds>
 
