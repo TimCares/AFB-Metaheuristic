@@ -22,6 +22,8 @@
   // works.
   bibliography-file: none,
 
+  appendix: none,
+
   // The paper's content.
   body
 ) = {
@@ -151,28 +153,34 @@
   }
   v(40pt, weak: true)
 
-  // Start two column mode and configure paragraph properties.
-  show: columns.with(2, gutter: 12pt)
+  // Configure paragraph properties.
   set par(justify: true, first-line-indent: 1em)
   show par: set block(spacing: 0.65em)
 
-  // Display abstract and index terms.
-  if abstract != none [
-    #set text(weight: 700)
-    #h(1em) _Abstract_---#abstract
+  columns(2, gutter: 12pt)[
+    // Display abstract and index terms.
+    #if abstract != none [
+      #set text(weight: 700)
+      #h(1em) _Abstract_---#abstract
 
-    #if index-terms != () [
-      #h(1em)_Index terms_---#index-terms.join(", ")
+      #if index-terms != () [
+        #h(1em)_Index terms_---#index-terms.join(", ")
+      ]
+      #v(2pt)
     ]
-    #v(2pt)
+
+    // Display the paper's contents.
+    #body
+
+    // Display bibliography.
+    #if bibliography-file != none {
+      show bibliography: set text(8pt)
+      bibliography(bibliography-file, title: text(10pt)[References], style: "ieee")
+    }
   ]
 
-  // Display the paper's contents.
-  body
-
-  // Display bibliography.
-  if bibliography-file != none {
-    show bibliography: set text(8pt)
-    bibliography(bibliography-file, title: text(10pt)[References], style: "ieee")
+  // Display appendix.
+  if appendix != none {
+    appendix
   }
 }

@@ -22,8 +22,8 @@
   ),
   index-terms: ("Scientific writing", "Typesetting", "Document creation", "Syntax"),
   bibliography-file: "refs.bib",
+  appendix: include "sections/appendix.typ"
 )
-
 #include "sections/introduction.typ"
 #include "sections/tsp.typ"
 #include "sections/algorithm_foundation.typ"
@@ -32,5 +32,3 @@
 #include "sections/sop.typ"
 #include "sections/analysis.typ"
 #include "sections/conclusion.typ"
-#include "sections/appendix.typ"
-
