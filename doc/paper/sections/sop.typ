@@ -17,13 +17,13 @@ However, as the number of constraints grows, this can lead to significantly long
 A more sophisticated approach is to modify the algorithms, so that they always return a valid path.
 Let's take a look at how to do this for the fly move.
 
-Some nodes have dependencies, that is a set of other nodes, which must occur in the path before they do.
-To make sure the generated random paths are always valid, we might sequentially draw new random nodes, excluding those that don't yet have their dependencies met.
-To implement this, we keep a pool of nodes, which have not yet been drawn, but whose dependencies have been met.
-To keep the pool up to date, we must update it after every draw, removing the drawn node and adding the nodes, which had the newly drawn one as their last unmet dependency.
+Some nodes have dependencies, that is, a set of other nodes that must appear in the path before they do.
+To ensure that the generated random paths are always valid, we sequentially draw new random nodes, excluding those whose dependencies haven't yet been satisfied.
+To implement this, we maintain a pool of nodes that have not yet been drawn, but whose dependencies have been satisfied.
+To keep the pool up-to-date, we need to update it after each draw, removing the drawn node and adding the nodes that had the newly drawn node as their last unfulfilled dependency.
 
 To find the nodes which have no more unmet dependencies, we store the number of unmet dependencies for every node in an array adjacent to the node array.
 After every draw, we loop through the relevant row of the cost matrix to find all nodes depending on the one drawn, and decrement their dependency count.
 If the count reaches zero, we add the node to the pool.
 
-While this approach works, its runtime is $O(n^2)$ ($n$ draws and $n$ possible dependents per draw), which is not ideal.
+This approach limits the worst-case runtime of the algorithm to $O(n^2)$ ($n$ draws and $n$ possible dependents per draw), where $n$ is the number of nodes.

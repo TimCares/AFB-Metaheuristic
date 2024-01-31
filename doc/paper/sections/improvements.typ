@@ -14,25 +14,24 @@ Since a decreased number of iterations per birds means each bird has less overal
 there will be a less pronounced exploitation of the search space, which in turn leads to worse results.
 
 One could avoid this by simply increasing the number of iterations, but this inevitably leads to longer running times.
-Instead, _we_ focus on improving the birds behavior, so that each bird needs fewer steps to reach a good solution.
+Instead, we focus on improving the birds behavior, so that each bird needs fewer steps to reach a good solution.
 
 == Swarm Behavior <SwarmBehavior>
 
-Currently, if one bird decides to join another, it does so by picking one randomly.
+Currently, if one bird decides to join another, it does so by picking the target randomly.
 This means joining any bird without considering how good the position of that bird might be. This contradicts the original idea of the authors that big birds tend to join others that have found a good food source (current solution seems promising) @afb.
-Therefore, we propose that a big bird will only be able to join the top-b percent of birds that have the lowest current cost. If one chooses the right ratio, we assume that it will automatically nudge the swarm in the direction of the global minimum.
+Therefore, we propose that a big bird will only be able to join the top $b$ percent of birds that have the lowest current cost.
+If one chooses the right ratio, we expect that it will automatically nudge the swarm to exploit promising solutions.
 
-We implement this by storing the indices $i$ of the birds in an ordered integer array $"ord"$ and introducing a new hyperparameter $b$, denoting which of the top-b percent to join. When we select the bird to join to, we draw a random uniform number $j$ between 1 and $b dot n$ ($n$ denotes the number of birds), and get the index of the bird to join from the ordered array ($"ord"[j]$).
+We implement this by storing the indices $i$ of the birds in an ordered integer array $"ord"$ and introducing a new hyperparameter $b$, denoting which of the top-b percent can be joined.
+When we select the bird to join, we draw a random uniform number $j$ between 1 and $b dot n$ ($n$ denotes the number of birds), and get the index of the bird to join from the ordered array ($"ord"[j]$).
+The new hyperparameter $b$ can be used to balance the algorithm between exploration (higher $b$ means more variance in the target birds) and exploitation (lower $b$ means tighter focus on the best birds).
 
-This introduces $b$ as an additional hyperparameter with which one can balance the algorithm between exploration (higher $b$ means more birds to join to, and therefore less focus on well performing birds) and exploration (lower $b$ means birds can only join the most successful bird(s), so
-more focus on improving good solutions).
+The main disadvantage of this approach is that we have to continuously update $"ord"$, so that we only join the current top $b$ percent at the moment of the move.
+We decide to update the list after each phase, where a phase is defined as a loop over all birds, in which each bird has moved once.
+We felt that updating the list after every single move was too costly, so this strikes a balance between more accurate results and less computation.
 
-The main disadvantage of this approach is that we have to continuously update $"ord"$ so that we only join the current top-b percent at the moment of the move.
-We decide to update the list after each bird has performed one move, which we call a "phase" (the algorithm
-goes through the phases until the iterations are used up, see @phases in Appendix).
-This strikes a balance between more accurate results and less computation, as updating the list after every move is too costly.
-
-We tested numerous values for $b$ and decided to build on $b=0.01$ for future improvements, as this strategy gives the best results (@top_b_performance).
+We tested numerous values for $b$ and decided to build on joining only the best bird for future improvements, as this strategy gives the best results (@top_b_performance).
 For intuitions on why such a low value performs so well, see @Intuitions.
 
 #figure(
@@ -48,21 +47,15 @@ For intuitions on why such a low value performs so well, see @Intuitions.
   ),
   caption: [
     Comparison of different parameters for our top-join.
-    $b = 1$ means all birds are potential candidates for joining.
-    This is the behaviour of the original algorithm, which is why we use it as a baseline.
-    It is not surprising that the baseline algorithms performs faster than our modified version,
-    as we need additional time for sorting. Notice however that the computation time
-    will not change for b-values in the interval $(0, 1)$, as we always need to sort all birds based on
-    their performance.
+    $b = 1$ means all birds are potential candidates for joining, which is the behavior of the original algorithm.
+    It is not surprising that the baseline algorithms performs faster than our modified version, as we need additional time for sorting.
+    Notice however that the computation time will not change for b-values in the interval $(0, 1)$, as we always need to sort all birds based on their performance.
   ],
 ) <top_b_performance>
 
-The improvements reflect our intuitions that good food sources (i.e. solutions) are
-more worthwhile to exploit that others. Interestingly, if during one phase
-all birds, wanting to join another, are forced to join the same bird (the best one of the
-current phase, which does not change as we do not update the ranking within a phase),
-we get the lowest error out of all configurations. We analyze why this setting performs so
-well in @Intuitions.
+The improvements reflect our intuition that good food sources (i.e. solutions) are more worthwhile to exploit than others.
+Interestingly, if during a phase all birds that want to join another are forced to join the same bird (the best one of the current phase, which does not change since we do not update the ranking within a phase), we get the lowest error out of all configurations.
+We analyze why this setting performs so well in @Intuitions.
 
 == 3-opt Walk <3_opt_walk>
 
@@ -70,7 +63,6 @@ For the walk move, the original algorithm uses a modified version of the 2-opt h
 Instead of using 2-opt, we tested a 3-opt variant, as this often yields the best solutions considering the computational complexity @lin.
 At the same time, we decide to remove the estimation of local similarity from the algorithm, which was used together with 2-opt to perform a local
 search. We do this, because the authors did not provide any intuitions on why this might be beneficial @afb.
-
 
 With 3-opt, each bird creates 7 slight variations of its current tour, and chooses the tour with the lowest cost (see @diff_2_opt_3_opt).
 At which 3 points a tour is opened is determined by a random uniform draw of 3 integers representing the indices of the nodes in the tour.
@@ -95,27 +87,25 @@ The results can be seen in @3_opt_performance.
     [Error (in %)], [69], [*44*],
     [Time (in s)], [*21*], [85],
   ),
-  caption: [Comparison of 2-opt and 3-opt. Note that the 2-opt configuration describes
-  our previous configuration of the algorithm, which already includes the top-join of @SwarmBehavior.
-  As noted in @Methodology, each experiment build on the most recent best performing one.
-  Therefore, the configuration 3-opt denotes a top-join to the best bird of a phase, together
-  with 3-opt for local search.
+  caption: [
+    Comparison of 2-opt and 3-opt.
+    Note that the 2-opt configuration describes our previous configuration of the algorithm, which already includes the top-join of @SwarmBehavior.
+    As noted in @Methodology, each experiment builds on the most recent best performing one.
+    Therefore, the configuration 3-opt denotes a top-join to the best bird of a phase, together with 3-opt for local search.
   ],
 ) <3_opt_performance>
 
-We acknowledge that this adjustment to the algorithm increases the runtime by a margin, but
-but due to the enormous improvement we decide to commit to this change and focus on improving
-the runtime behavior in the following sections.
+// Das ist mehr als ein margin, das ist ein Faktor 4
+We acknowledge that this adjustment to the algorithm increases the runtime significantly, but because of the enormous improvement, we decide to commit to this change and focus on improving the runtime behavior in the following sections.
 
 == Separating Responsibilities <DelegatingResponsibility>
 
-Apart form the obvious increase in complexity that results for the 3-opt algorithm itself,
-the main reason why the runtime quadruples is that we do not implement the 3-opt algorithm
-as an iterative solver by itself, but rather in a swarm algorithm, in which agents can perform a single 3-opt iteration at a time.
-To now reduce this effect, we decided to limit the responsibility of deep exploitation by 3-opt to a subset of birds.
+Apart from the obvious increase in complexity that results for the 3-opt algorithm itself,
+the main reason why the runtime quadruples is that every walk move has to evaluate seven possible new tours, from which the best is taken.
+To reduce the impact this has on the runtime, we decided to limit the responsibility of deep exploitation by 3-opt to a subset of birds.
 
 We test the case where only big birds are able to perform a 3-opt walk, while small birds are only able to perform the usual 2-opt walk as specified in the paper. 
-This should not only reduce the computational complexity, but also fits well with the assumption that big birds are "superior", since only they can join other birds and thus benefit from them.
+This should not only reduce the computational complexity, but also fits well with the assumption that big birds are "superior", since only they can join other birds and thus benefit from their discoveries.
 This effectively divides the flock into two groups: The small birds responsible for _exploration_ and the big birds responsible for _exploitation_.
 See @ExploitatorsAndExplorators for details on this separation.
 For completeness, we also test the inverse approach: Only small birds can perform 3-opt.
@@ -123,26 +113,11 @@ For completeness, we also test the inverse approach: Only small birds can perfor
 Surprisingly, restricting 3-opt to big birds achieves the same performance as before, while cutting the runtime in half (@three_opt_big_small_performance).
 We also noticed an increased error rate for small birds, even though the ratio of small birds in our experiments is always greater than 50% ($r > 0.5$),
 meaning that the algorithm performs worse if we have more birds that perform 3-opt, given that those are small birds.
-This suggests that which type of bird can perform 3-opt is more important than the number of birds that can perform it.
+This suggests that it is not only the number of birds performing 3-opt that is important, but also a clean separation of exploitation and exploration.
+Careless mixing of the two, resulting in extensive exploitation of suboptimal solutions, which will never lead to competitive results, can be detrimental to the performance of the algorithm.
 
 Based on these results, we decided to use 3-opt only for big birds in our future experiments, as there seems to be no downside to this approach.
 
-/*
-\begin{table}[h!]
-\centering
-\begin{tabular}{ |p{2cm}||p{0.75cm}|p{0.75cm}|p{0.75cm}|p{0.75cm}|  }
- \hline
- Configuration& 2-opt & 3-opt & \textbf{3-opt big birds} & 3-opt small birds\\
- \hline \hline
-PercentError & 69 & \textbf{44} & \textbf{44} & 85\\
- \hline
- Time (in s) & \textbf{21} & 85 & 40 & 69\\
- \hline
-\end{tabular}
-\caption{}
-\label{3_opt_big_small_performance}
-\end{table}
-*/
 #figure(
   table(
     columns: 5,
@@ -154,12 +129,11 @@ PercentError & 69 & \textbf{44} & \textbf{44} & 85\\
     [Error (in %)], [69], [*44*], [*44*], [85],
     [Time (in s)], [*21*], [85], [40], [69],
   ),
-  caption: [Because be usually configure more birds to be small than large ($r > 0.5$),
-  we have a higher reduction in runtime if only big birds can perform 3-opt, compared to the
-  inverse variant. Under this circumstance it is surprising that we achieve a better performance
-  if big birds can perform 3-opt. Again, we compare this configuration with our best result
-  up to this point (3-opt together with top-join), and provide 2-opt paired with top-join as
-  an additional reference.],
+  caption: [
+    Because we usually configure more birds to be small than large ($r > 0.5$), we have a greater reduction in runtime when only big birds can perform 3-opt than when the reverse is true.
+    Under these circumstances, it is surprising that we achieve better performance when big birds can perform 3-opt.
+    Again, we compare this configuration to our best result so far (3-opt paired with top-join), and provide 2-opt paired with top-join as an additional reference.
+  ],
 ) <three_opt_big_small_performance>
 
 == Nearest Neighbor Initialization <NearestNeighborInitialization>
@@ -195,7 +169,7 @@ However, the results improved dramatically from an average error of $44%$ with r
 == Early Stopping <EarlyStopping>
 
 If we analyze the convergence behavior by plotting the cost of the best solution over the number of iterations
-(Figure TODO),
+(@pr1002_results),
 we notice that our improved version of the algorithm converges much faster than the original algorithm,
 even without a nearest neighbor initialization. Because it is difficult to estimate how many iterations
 are needed for a certain problem, and adapting the number of iterations to the problem at hand would
@@ -204,11 +178,11 @@ That way we do not waste computational resources on iterations that do not impro
 which will reduce the runtime even further, especially for smaller TSP configurations, while retaining
 a similar performance.
 
-We implement this by introducing a new hyperparameter $p$, denoting the number of phases
-without an improvement of the best current solution. If it is exceeded, the algorithm will stop.
-This requires us to store the best solution over all birds and updating it continuously.
+
+We implement this by introducing a new hyperparameter $p$, which denotes the number of phases without improvement of the best solution after which the algorithm stops.
+This requires us to store and continuously update the best solution for all birds.
 Fittingly, this is already implemented through the top-join (see @SwarmBehavior), as we already need to store the best solution over all birds in order to determine which bird
-to join to. This is also the reason why we only check if the best solution has improved after each phase,
+to join. This is also the reason why we only check if the best solution has improved after each phase,
 and not after each iteration, as the ranking of the birds is not updated within a phase.
 A review during a phase therefore does not make sense.
 
@@ -224,19 +198,19 @@ A review during a phase therefore does not make sense.
     [Time (in s)], [42], [*9*],
   ),
   caption: [Adding early stopping to our algorithm has the desired effect:
-  We can reduce the runtime to a time less than half of the basic algorithm (compare @top_b_performance),
-  while increasing to error by a merely 2% compared to @NearestNeighborInitialization.
+  We can reduce the runtime to less than half of the basic algorithm (compare @top_b_performance),
+  while increasing the error by a mere 2% compared to @NearestNeighborInitialization.
   Overall, we are able to reduce the error for our benchmark problems (see @Methodology)
   by *487%*.],
 ) <early_stopping_performance>
 
-This concludes out improvements on the algorithm. For visualizations of the optimization behavior, and a comparison
-between out incremental improvements, please refer to @pr1002_results and @pr2392_results in the Appendix.
+This concludes our improvements of the algorithm. For visualizations of the optimization behavior, and a comparison
+between our incremental improvements, please refer to @pr1002_results and @pr2392_results in the Appendix.
 
 == Choosing Hyperparameters: Metabirds <Metabirds>
 
 Both the original algorithm and our extensions define various hyperparameters like the number of birds, the ratio of small birds, the top-b join percentage, the probabilities of the basic moves
-We have already discussed analytical approaches to choosing some of these values, but these tests were limited and did not capture the possible complex interplay between different hyperparameters.
+We have already discussed analytical approaches (for example @CANOF or @top_b_performance) to choosing some of these values, but these tests were limited and did not capture the possible complex interplay between different hyperparameters.
 
 To remedy this, we chose to apply an optimization algorithm to the hyperparameters of the TSP solver.
 The choice of optimization algorithm was simple: we used the same AFB algorithm that the TSP solver itself uses.
@@ -244,10 +218,10 @@ We call this algorithm _Metabirds_, as every bird in the hyperparameter optimize
 
 To be more precise, every metabird represents a position in the hyperparameter space made up of values for the number of birds, the ratio of small birds, the top-b join percentage and the various move probabilities.
 For the walk of a metabird, we sample random deltas from a normal distribution and apply them to the hyperparameters.
-Flying to a new position is done choosing random values for the hyperparameters.
+Flying to a new position is done by choosing random values for the hyperparameters.
 
-The problem with these simple implementations is, that they can produce invalid values.
-Specifically,the following conditions must be met:
+The problem with this simple implementation is that they can produce invalid values.
+Specifically, the following conditions must be met:
 
 - the sum of the move probabilities cannot exceed one
 - the top-b join percentage must be large enough to include at least one bird
@@ -255,46 +229,7 @@ Specifically,the following conditions must be met:
 
 Since these meta-moves do not contribute a lot to the overall runtime, we decided to solve this by simply sampling new configurations until we find one that is valid.
 
-To evaluate the cost of a metabird, we run create a TSP solver with birds configuration, run it 8 times and average the results.
+To evaluate the cost of a metabird, we create a TSP solver with the bird's configuration, run it 10 times and average the results.
 
 We ran the metabirds algorithm multiple times with different problems (eil101, d493, dsj1000, fnl4461) to optimize for different TSP sizes.
 To make these runs, which took multiple days, feasible, the algorithm was compiled to native code using GraalVM and executed on cloud resources.
-
-
-/*
-// TODO: Results and observations from the metabird runs
-
-#import "@preview/plotst:0.2.0": *
-
-#let histogram_test_2() = {
-  let data = (
-    (101, 20000000 / 619 / 2),
-    (493, 20000000 / 817 / 10),
-    (1000, 5000000 / 386 / 5),
-    (4461, 500000 / 10 / 10),
-    /*(101, 20000000 / 619),
-    (493, 20000000 / 817),
-    (1000, 5000000 / 386),
-    (4461, 500000 / 10),*/
-  )
-  /*let data = (
-    (101, 0.2235857343494696),
-    (493, 0.050676743875328945),
-    (1000, 0.19409974797046914),
-    (4461, 0.3314722966118387),
-  )*/
-
-  // Create the axes used for the chart 
-  let x_axis = axis(min: 0, max: 4461, step: 1000, location: "bottom")
-  let y_axis = axis(min: 0, max: 20000, step: 5000, location: "left", helper_lines: false)
-
-  // Combine the axes and the data and feed it to the plot render function.
-  let pl = plot(data: data, axes: (x_axis, y_axis))
-  graph_plot(pl, (100%, 25%))
-}
-
-#histogram_test_2()
-*/
-
-// TODO: One observation might be, that random flying is not completely useless.
-// TODO: Metabirds shows how the AFB algorithm can be applied to non discrete problems.
